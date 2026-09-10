@@ -57,7 +57,6 @@ O cartão centralizado da aeronave usa texto ampliado e mostra matrícula, tipo,
 
 As fontes rápidas originais do LVGL recebem pequenos fallbacks `font_pt_16/18/24/28` com os glifos acentuados portugueses. Para regenerá-los depois de instalar as dependências do PlatformIO, execute `scripts/build_fonts.sh`; o gerador usa a Montserrat Medium distribuída com o LVGL.
 
-O firmware não desenha trajetórias percorridas. Entre respostas da API, a posição de cada aeronave é interpolada suavemente sem deixar linhas no mapa.
 
 ## Instalar ferramentas e compilar
 
@@ -70,7 +69,7 @@ pio run -t upload
 pio device monitor -b 115200
 ```
 
-No Mac usado para desenvolvimento, a porta foi `/dev/cu.usbmodem1101`; se necessário:
+porta foi `/dev/cu.usbmodem1101`; se necessário:
 
 ```sh
 pio device list
