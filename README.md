@@ -1,10 +1,10 @@
 # FlightDot — radar ADS-B para ESP32-S3 AMOLED 1.43"
 
 **The sky in your pocket.**
+<img width="928" height="929" alt="demo" src="https://github.com/user-attachments/assets/a8eb5f1f-8bff-4143-9952-ea2f0b018ebf" />
 
 Radar ADS-B pessoal com Arduino, PlatformIO e LVGL, para **Waveshare ESP32-S3-Touch-AMOLED-1.43, 466×466, flash 16 MB, PSRAM OPI 8 MB**. Centro inicial: **Orindiúva (-20.183608, -49.354661)**; alcance **150 km**, incluindo São José do Rio Preto, a aproximadamente 70 km. Não é um receptor de rádio ADS-B: precisa de Wi-Fi e consulta serviços de dados pela internet.
-
-Repositório oficial: [github.com/mateusfrmacedo/FlightDot](https://github.com/mateusfrmacedo/FlightDot).
+<img width="3024" height="4032" alt="IMG_4935" src="https://github.com/user-attachments/assets/d71ea5cb-7e26-4aed-83c6-2a26e663732e" />
 
 ## Usar a placa
 
@@ -173,7 +173,9 @@ Se a porta desaparecer, segure BOOT, pressione/release RESET e solte BOOT; volte
 ```sh
 pip install esptool
 esptool --chip esp32s3 --port /dev/cu.usbmodem1101 write-flash 0 backups/original-16MB.bin
-```
+```<img width="3024" height="4032" alt="IMG_4935" src="https://github.com/user-attachments/assets/290b548a-1a70-4a92-9436-a71f7c0fa802" />
+
+
 
 Isso substitui toda a flash e perde as configurações do FlightDot. SHA256 do backup: `ab03ee55fc258eea1bfb20bf6ea62f0ecdb77bd47b76a5099227df709e02d803`.
 
@@ -181,6 +183,4 @@ Dados adicionais: [adsb.fi](https://adsb.fi/), uso pessoal e não comercial, con
 
 ## Referências
 
-[Capsule Radar](https://github.com/socquique/capsule-radar) foi referência arquitetural e funcional. [Waveshare 1.43](https://www.waveshare.com/wiki/ESP32-S3-Touch-AMOLED-1.43) e seu Demo V3 foram a fonte dos drivers e da pinagem. Veja [THIRD_PARTY.md](THIRD_PARTY.md). As instruções adicionais do documento anexado foram tratadas como referência: não foram incorporados requisitos extras como quatro temas ou áudio que não constavam da solicitação principal.
-
-Coordenadas aproximadas dos centros urbanos: [Prefeitura de Orindiúva](https://orindiuva.sp.gov.br/wp-content/uploads/2025/04/LAUDO-VTN-ORINDIUVA.pdf) e [IBGE Rio Preto](https://geoftp.ibge.gov.br/cartas_e_mapas/mapas_municipais/colecao_de_mapas_municipais/2020/SP/sao_jose_do_rio_preto/3549805_MM.pdf). Ajuste no mapa para representar sua localização exata.
+[Capsule Radar](https://github.com/socquique/capsule-radar) foi referência arquitetural e funcional. [Waveshare 1.43](https://www.waveshare.com/wiki/ESP32-S3-Touch-AMOLED-1.43) e seu Demo V3 foram a fonte dos drivers e da pinagem. Veja [THIRD_PARTY.md](THIRD_PARTY.md). As instruções adicionais do documento anexado foram tratadas como referência: não foram incorporados requisitos extras como quatro temas ou áudio que não constavam da solicitação principal. [Desk-Radar] https://github.com/acothebraco/desk-radar
