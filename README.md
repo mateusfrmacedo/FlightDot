@@ -1,2 +1,2 @@
-# FLIGHT • DOT
+# FLIGHT•DOT
 The sky in your pocket.
