@@ -6,6 +6,7 @@
 #include <cstring>
 namespace ui {
 static constexpr int SCOPE_RADIUS = 228;
+static constexpr float AIRCRAFT_ICON_SCALE = 2.0f;
 static Settings cfg;
 static Snapshot data, previous;
 static Status status;
@@ -175,12 +176,12 @@ static void radar(lv_draw_ctx_t *c, uint32_t color) {
     float h = std::isfinite(a.heading) ? a.heading * .01745329252f : 0;
     float sx = sin(h), cy = cos(h);
     auto seg = [&](float ax, float ay, float bx, float by) {
-      ax *= 1.5f;
-      ay *= 1.5f;
-      bx *= 1.5f;
-      by *= 1.5f;
+      ax *= AIRCRAFT_ICON_SCALE;
+      ay *= AIRCRAFT_ICON_SCALE;
+      bx *= AIRCRAFT_ICON_SCALE;
+      by *= AIRCRAFT_ICON_SCALE;
       line(c, x + ax * cy - ay * sx, y + ax * sx + ay * cy, x + bx * cy - by * sx,
-           y + bx * sx + by * cy, tint, 3);
+           y + bx * sx + by * cy, tint, 4);
     };
     if (!strcmp(a.category, "A7")) {
       seg(-11, -5, 11, -5);
@@ -188,17 +189,17 @@ static void radar(lv_draw_ctx_t *c, uint32_t color) {
       seg(0, -5, 0, 9);
       seg(-6, 9, 6, 9);
     } else if (!strcmp(a.category, "B2")) {
-      circle(c, x, y - 4, 11, tint, 3);
+      circle(c, x, y - 4 * AIRCRAFT_ICON_SCALE, 14, tint, 4);
       seg(-4, 7, 4, 7);
       seg(-4, 7, -2, 12);
       seg(4, 7, 2, 12);
     } else if (!strcmp(a.category, "B6")) {
       seg(-9, -9, 9, 9);
       seg(9, -9, -9, 9);
-      circle(c, x - 14, y - 14, 4, tint, 2);
-      circle(c, x + 14, y - 14, 4, tint, 2);
-      circle(c, x - 14, y + 14, 4, tint, 2);
-      circle(c, x + 14, y + 14, 4, tint, 2);
+      circle(c, x - 14 * AIRCRAFT_ICON_SCALE, y - 14 * AIRCRAFT_ICON_SCALE, 5, tint, 3);
+      circle(c, x + 14 * AIRCRAFT_ICON_SCALE, y - 14 * AIRCRAFT_ICON_SCALE, 5, tint, 3);
+      circle(c, x - 14 * AIRCRAFT_ICON_SCALE, y + 14 * AIRCRAFT_ICON_SCALE, 5, tint, 3);
+      circle(c, x + 14 * AIRCRAFT_ICON_SCALE, y + 14 * AIRCRAFT_ICON_SCALE, 5, tint, 3);
     } else {
       seg(0, -10, 0, 9);
       seg(-8, 2, 0, -3);
@@ -207,9 +208,9 @@ static void radar(lv_draw_ctx_t *c, uint32_t color) {
       seg(0, 6, 4, 9);
     }
     if (emergency(a))
-      circle(c, x, y, 21, tint, 2, (timeMs / 400) % 2 ? 255 : 90);
+      circle(c, x, y, 27, tint, 3, (timeMs / 400) % 2 ? 255 : 90);
     if (i < aircraftLabelLimit && labelCount < 32) {
-      int candidates[][2] = {{int(x) + 19, int(y) - 9},
+      int candidates[][2] = {{int(x) + 25, int(y) - 9},
                              {int(x) - 123, int(y) - 9},
                              {int(x) - 52, int(y) + 22},
                              {int(x) - 52, int(y) - 38}};
