@@ -8,7 +8,7 @@ Radar ADS-B pessoal com Arduino, PlatformIO e LVGL, para **Waveshare ESP32-S3-To
 
 ## Usar a placa
 
-1. Ligue por USB. Uma animação mostra **FlightDot** em fonte de 42 px e um avião em perfil atravessando lentamente a tela antes de abrir o radar. No primeiro uso, conecte o celular à rede **FlightDot-Setup**.
+1. Ligado por USB ou bateria .  atravessando lentamente a tela antes de abrir o radar. No primeiro uso, conecte o celular à rede **FlightDot-Setup**.
 2. O portal deve abrir automaticamente. Se não abrir, acesse **http://192.168.4.1/**. Informe o nome e a senha da sua rede **2,4 GHz**.
 3. Volte à rede de casa e abra **http://flightdot.local/**. Se o roteador não oferecer mDNS, use o IP informado pelo monitor serial.
 4. A página permite pesquisar cidade/aeroporto, seguir um voo e mudar alcance (10–250 km), tema, brilho, fuso e limite de atraso. O minimapa e os campos manuais de latitude/longitude foram retirados.
