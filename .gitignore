@@ -1,0 +1,6 @@
+.pio/
+.venv/
+backups/
+__pycache__/
+.DS_Store
+artifacts/

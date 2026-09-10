@@ -1,0 +1,26 @@
+#pragma once
+#define LV_CONF_H
+#define LV_COLOR_DEPTH 16
+#define LV_COLOR_16_SWAP 1
+#define LV_MEM_SIZE (1024U * 1024U)
+#ifdef ARDUINO
+#define LV_MEM_CUSTOM 1
+#define LV_MEM_CUSTOM_INCLUDE "lv_memory.h"
+#define LV_MEM_CUSTOM_ALLOC plano_lv_malloc
+#define LV_MEM_CUSTOM_FREE plano_lv_free
+#define LV_MEM_CUSTOM_REALLOC plano_lv_realloc
+#endif
+#define LV_DISP_DEF_REFR_PERIOD 33
+#define LV_INDEV_DEF_READ_PERIOD 20
+#define LV_FONT_MONTSERRAT_12 1
+#define LV_FONT_MONTSERRAT_14 1
+#define LV_FONT_MONTSERRAT_16 1
+#define LV_FONT_MONTSERRAT_18 1
+#define LV_FONT_MONTSERRAT_20 1
+#define LV_FONT_MONTSERRAT_24 1
+#define LV_FONT_MONTSERRAT_26 1
+#define LV_FONT_MONTSERRAT_28 1
+#define LV_USE_LOG 0
+#define LV_USE_PERF_MONITOR 0
+#define LV_USE_DEMO_WIDGETS 0
+#define LV_USE_DEMO_BENCHMARK 0
