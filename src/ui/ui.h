@@ -30,5 +30,6 @@ void circle(lv_draw_ctx_t *ctx, int x, int y, int radius, uint32_t color, int wi
             int opacity = 255);
 void list(lv_draw_ctx_t *ctx, const Snapshot &data, int page, uint32_t color);
 void statistics(lv_draw_ctx_t *ctx, const Snapshot &data, int rangeKm, uint32_t color);
-void details(lv_draw_ctx_t *ctx, const Aircraft &a, const Route &route, uint32_t color);
+void details(lv_draw_ctx_t *ctx, const Aircraft &a, const Route &route, int radarRangeKm,
+             uint32_t color);
 } // namespace ui

@@ -21,12 +21,13 @@ void statistics(lv_draw_ctx_t *c, const Snapshot &d, int rangeKm, uint32_t color
   text(c, 80, 92, 306, "ESTATÍSTICAS", color, 24, LV_TEXT_ALIGN_CENTER);
   char b[220];
   snprintf(b, sizeof(b),
-           "%u aeronaves em %d km\n\nBaixas/médias/altas: %d / %d / %d\n\nMaior altitude: "
+           "Alcance do radar: %d km\n\nAeronaves recebidas: %u\n\nBaixas/médias/altas: %d / %d / %d\n\nMaior altitude: "
            "%.0f m / %.0f ft\n\nEmergências: %d\n\nFonte: %s",
-           unsigned(d.count), rangeKm, low, mid, high, max * .3048f, max, e, d.provider);
+           rangeKm, unsigned(d.count), low, mid, high, max * .3048f, max, e, d.provider);
   text(c, 90, 145, 290, b, color, 14);
 }
-void details(lv_draw_ctx_t *c, const Aircraft &a, const Route &r, uint32_t color) {
+void details(lv_draw_ctx_t *c, const Aircraft &a, const Route &r, int radarRangeKm,
+             uint32_t color) {
   const char *name = a.callsign[0] ? a.callsign : a.hex;
   text(c, 55, 39, 356, name, color, 24, LV_TEXT_ALIGN_CENTER);
 
@@ -68,13 +69,13 @@ void details(lv_draw_ctx_t *c, const Aircraft &a, const Route &r, uint32_t color
   char b[560];
   snprintf(b, sizeof(b),
            "%s  %s\nAltitude  %.0f m / %.0f ft\nVelocidade  %.0f km/h / %.0f kt\n"
-           "Distância  %.1f km / %.1f NM\nRumo  %.0f°   Squawk  %s\nChegada aprox.  %s\n"
+           "Distância  %.1f km / %.1f NM\nAlcance do radar  %d km\nRumo  %.0f°   Squawk  %s\nChegada aprox.  %s\n"
            "Tempo de voo aprox.  %s\nClima destino  %s",
            a.registration[0] ? a.registration : "Sem matrícula",
            r.type[0] ? r.type : (a.type[0] ? a.type : "Tipo consultando"), a.altitude * .3048f,
-           a.altitude, a.speed * 1.852f, a.speed, a.distance, a.distance / 1.852f, a.heading,
-           a.squawk[0] ? a.squawk : "--", arrival, duration, weather);
-  text(c, 28, 174, 410, b, emergency(a) ? 0xff7777 : color, 18, LV_TEXT_ALIGN_CENTER);
-  text(c, 85, 434, 296, "Toque para voltar", 0xb8c9be, 12, LV_TEXT_ALIGN_CENTER);
+           a.altitude, a.speed * 1.852f, a.speed, a.distance, a.distance / 1.852f, radarRangeKm,
+           a.heading, a.squawk[0] ? a.squawk : "--", arrival, duration, weather);
+  text(c, 28, 166, 410, b, emergency(a) ? 0xff7777 : color, 18, LV_TEXT_ALIGN_CENTER);
+  text(c, 85, 442, 296, "Toque para voltar", 0xb8c9be, 12, LV_TEXT_ALIGN_CENTER);
 }
 } // namespace ui

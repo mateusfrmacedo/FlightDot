@@ -271,7 +271,7 @@ static void draw(lv_event_t *e) {
     return;
   }
   if (detail)
-    details(c, selected, route, color);
+    details(c, selected, route, cfg.rangeKm, color);
   else if (view == 0)
     radar(c, color);
   else if (view == 1)
