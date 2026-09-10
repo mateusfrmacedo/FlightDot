@@ -257,15 +257,20 @@ static void splash(lv_draw_ctx_t *c) {
        LV_TEXT_ALIGN_CENTER);
   float progress = std::clamp((int(elapsed) - 300) / 2400.f, 0.f, 1.f);
   int x = 36 + int(progress * 394), y = 272;
-  // Side profile: the aircraft travels left-to-right, rather than nose-up.
-  line(c, x - 20, y, x + 18, y, color, 4);
-  line(c, x + 18, y, x + 10, y - 7, color, 3);
-  line(c, x + 10, y - 7, x + 10, y + 7, color, 3);
-  line(c, x + 10, y + 7, x + 18, y, color, 3);
-  line(c, x - 2, y, x - 11, y - 13, color, 4);
-  line(c, x - 2, y, x - 11, y + 13, color, 4);
-  line(c, x - 15, y, x - 21, y - 7, color, 3);
-  line(c, x - 15, y, x - 21, y + 7, color, 3);
+  // The exact standard-aircraft silhouette used on the radar, rotated right.
+  auto planeSeg = [&](float ax, float ay, float bx, float by) {
+    ax *= AIRCRAFT_ICON_SCALE;
+    ay *= AIRCRAFT_ICON_SCALE;
+    bx *= AIRCRAFT_ICON_SCALE;
+    by *= AIRCRAFT_ICON_SCALE;
+    // A 90° clockwise rotation turns the radar aircraft towards the right.
+    line(c, x - ay, y + ax, x - by, y + bx, color, 4);
+  };
+  planeSeg(0, -10, 0, 9);
+  planeSeg(-8, 2, 0, -3);
+  planeSeg(0, -3, 8, 2);
+  planeSeg(-4, 9, 0, 6);
+  planeSeg(0, 6, 4, 9);
   for (int i = 1; i <= 4; ++i)
     line(c, x - 22 - i * 20, y, x - 34 - i * 20, y, color, 2, 220 / i);
 }
