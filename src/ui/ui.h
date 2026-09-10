@@ -8,6 +8,7 @@ LV_FONT_DECLARE(font_pt_16);
 LV_FONT_DECLARE(font_pt_18);
 LV_FONT_DECLARE(font_pt_24);
 LV_FONT_DECLARE(font_pt_28);
+LV_FONT_DECLARE(font_pt_42);
 #ifdef __cplusplus
 }
 #endif

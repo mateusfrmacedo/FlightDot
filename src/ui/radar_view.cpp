@@ -44,7 +44,8 @@ void text(lv_draw_ctx_t *c, int x, int y, int w, const char *value, uint32_t col
   lv_draw_label_dsc_t d;
   lv_draw_label_dsc_init(&d);
   d.color = lv_color_hex(color);
-  d.font = size == 24   ? &font_pt_28
+  d.font = size == 42   ? &font_pt_42
+           : size == 24 ? &font_pt_28
            : size == 18 ? &font_pt_24
            : size == 12 ? &font_pt_16
                         : &font_pt_18;
@@ -246,22 +247,26 @@ static uint32_t fadeColor(uint32_t color, unsigned alpha) {
 static void splash(lv_draw_ctx_t *c) {
   uint32_t elapsed = timeMs - splashStart;
   unsigned alpha = elapsed < 450 ? elapsed * 255 / 450
-                   : elapsed > 2200
-                       ? std::max(0, 2800 - int(elapsed)) * 255 / 600
+                   : elapsed > 2700
+                       ? std::max(0, 3400 - int(elapsed)) * 255 / 700
                        : 255;
   uint32_t color = fadeColor(0x66ff9b, alpha);
-  text(c, 58, 174, 350, "FlightDot", color, 24, LV_TEXT_ALIGN_CENTER);
-  text(c, 100, 214, 266, "LIVE ADS-B", fadeColor(0xb7c9be, alpha), 12,
+  text(c, 28, 150, 410, "FlightDot", color, 42, LV_TEXT_ALIGN_CENTER);
+  text(c, 100, 207, 266, "LIVE ADS-B", fadeColor(0xb7c9be, alpha), 12,
        LV_TEXT_ALIGN_CENTER);
-  float progress = std::clamp((int(elapsed) - 300) / 1800.f, 0.f, 1.f);
-  int x = 58 + int(progress * 350), y = 270;
-  line(c, x, y - 15, x, y + 15, color, 4);
-  line(c, x - 17, y + 2, x, y - 5, color, 4);
-  line(c, x, y - 5, x + 17, y + 2, color, 4);
-  line(c, x - 8, y + 14, x, y + 9, color, 3);
-  line(c, x, y + 9, x + 8, y + 14, color, 3);
+  float progress = std::clamp((int(elapsed) - 300) / 2400.f, 0.f, 1.f);
+  int x = 36 + int(progress * 394), y = 272;
+  // Side profile: the aircraft travels left-to-right, rather than nose-up.
+  line(c, x - 20, y, x + 18, y, color, 4);
+  line(c, x + 18, y, x + 10, y - 7, color, 3);
+  line(c, x + 10, y - 7, x + 10, y + 7, color, 3);
+  line(c, x + 10, y + 7, x + 18, y, color, 3);
+  line(c, x - 2, y, x - 11, y - 13, color, 4);
+  line(c, x - 2, y, x - 11, y + 13, color, 4);
+  line(c, x - 15, y, x - 21, y - 7, color, 3);
+  line(c, x - 15, y, x - 21, y + 7, color, 3);
   for (int i = 1; i <= 4; ++i)
-    line(c, x - i * 20, y + 15, x - i * 20 - 12, y + 15, color, 2, 220 / i);
+    line(c, x - 22 - i * 20, y, x - 34 - i * 20, y, color, 2, 220 / i);
 }
 static void draw(lv_event_t *e) {
   auto c = lv_event_get_draw_ctx(e);
@@ -467,7 +472,7 @@ void tick(uint32_t now) {
   if (!splashStart)
     splashStart = now;
   if (!splashDone) {
-    if (now - splashStart < 2800) {
+    if (now - splashStart < 3400) {
       if (now - last >= 33) {
         lv_area_t area = {35, 150, 431, 310};
         lv_obj_invalidate_area(root, &area);

@@ -10,7 +10,7 @@ if [ ! -f "$font_source" ]; then
   exit 1
 fi
 
-for size in 16 18 24 28; do
+for size in 16 18 24 28 42; do
   npx --yes lv_font_conv \
     --font "$font_source" \
     --symbols "áàâãäéèêëíìîïóòôõöúùûüçÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇº°" \
