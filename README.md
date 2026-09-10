@@ -19,7 +19,7 @@ Os voos só aparecem após conexão, sincronização do relógio e uma resposta 
 
 | Opção | Padrão | Intervalo / efeito |
 |---|---:|---|
-| Centro | Orindiúva | Definido pela pesquisa de cidade ou aeroporto; nome e coordenadas ficam em NVS |
+| Centro | sua cidade | Definido pela pesquisa de cidade ou aeroporto; nome e coordenadas ficam em NVS |
 | Alcance | 150 km | 10–250 km pela página; gestos alternam 50/100/150/250 km |
 | Tema | Fósforo verde | Fósforo, âmbar, vermelho, azul ou verde neon |
 | Brilho | 150 | 10–255, fixo até nova alteração |
