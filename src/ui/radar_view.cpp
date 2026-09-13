@@ -16,7 +16,7 @@ static lv_obj_t *root;
 static uint32_t timeMs = 0, received = 0, touched = 0, pressed = 0, lastTap = 0;
 static lv_point_t down;
 static int view = 0, page = 0;
-static bool detail = false;
+static bool detail = false, zoomMenu = false;
 static Action pending = Action::None;
 static float pointX[MAX_AIRCRAFT], pointY[MAX_AIRCRAFT];
 static float startX[MAX_AIRCRAFT], startY[MAX_AIRCRAFT];
@@ -261,6 +261,26 @@ static void splash(lv_draw_ctx_t *c) {
   for (int i = 1; i <= 4; ++i)
     line(c, x - 22 - i * 20, y, x - 34 - i * 20, y, color, 2, 220 / i);
 }
+static void drawZoomMenu(lv_draw_ctx_t *c, uint32_t color) {
+  lv_draw_rect_dsc_t panel;
+  lv_draw_rect_dsc_init(&panel);
+  panel.bg_color = lv_color_black();
+  panel.bg_opa = LV_OPA_90;
+  panel.border_color = lv_color_hex(BEAM_COLOR);
+  panel.border_width = 2;
+  panel.radius = 16;
+  lv_area_t area = {61, 153, 405, 319};
+  lv_draw_rect(c, &panel, &area);
+  text(c, 80, 170, 306, "ZOOM DO MAPA", color, 12, LV_TEXT_ALIGN_CENTER);
+  circle(c, 145, 235, 37, BEAM_COLOR, 3);
+  circle(c, 321, 235, 37, BEAM_COLOR, 3);
+  line(c, 127, 235, 163, 235, color, 4);
+  line(c, 303, 235, 339, 235, color, 4);
+  line(c, 321, 217, 321, 253, color, 4);
+  char value[20];
+  snprintf(value, sizeof(value), "%d km", cfg.rangeKm);
+  text(c, 80, 280, 306, value, 0xffe69a, 18, LV_TEXT_ALIGN_CENTER);
+}
 static void draw(lv_event_t *e) {
   auto c = lv_event_get_draw_ctx(e);
   uint32_t color = TEXT_COLOR;
@@ -276,6 +296,8 @@ static void draw(lv_event_t *e) {
     list(c, data, page, color);
   else
     statistics(c, data, cfg.rangeKm, color);
+  if (zoomMenu && !detail && view == 0)
+    drawZoomMenu(c, color);
   if (detail)
     return;
   // HUD text overlays the scope directly, without background boxes.
@@ -320,16 +342,22 @@ static void input(lv_event_t *e) {
   lv_obj_invalidate(root);
   int dx = p.x - down.x, dy = p.y - down.y;
   uint32_t held = timeMs - pressed;
-  // Only a deliberate horizontal gesture changes the view. Previously any
-  // vertical displacement over 65 px also switched screens, making a noisy
-  // touch sample look like an automatic Radar/List/Statistics change.
-  if (abs(dx) >= 85 && abs(dx) > abs(dy) * 2 && held < 1200) {
-    detail = false;
-    view = (view + (dx < 0 ? 1 : 2)) % 3;
+  // A left swipe only opens the zoom controls. Screen views are never changed
+  // by a swipe, so an isolated bad touch sample cannot switch the interface.
+  if (!detail && dx <= -105 && abs(dy) <= 42 && held >= 90 && held < 900) {
+    zoomMenu = true;
     lastTap = 0;
     return;
   }
-  if (held < 45 || held > 1000 || abs(dy) >= 85) {
+  if (zoomMenu && dx >= 105 && abs(dy) <= 42 && held >= 90 && held < 900) {
+    zoomMenu = false;
+    lastTap = 0;
+    return;
+  }
+  // Accept taps only when the finger stayed nearly in the same position.
+  // This rejects the jitter that the touch controller can emit on the shared
+  // I2C bus while keeping ordinary taps responsive.
+  if (held < 70 || held > 900 || abs(dx) > 20 || abs(dy) > 20) {
     lastTap = 0;
     return;
   }
@@ -338,14 +366,21 @@ static void input(lv_event_t *e) {
     lastTap = 0;
     return;
   }
-  if (lastTap && timeMs - lastTap < 330) {
-    int presets[] = {50, 100, 150, 250};
-    int next = 0;
-    for (int i = 0; i < 4; i++)
-      if (cfg.rangeKm == presets[i])
-        next = (i + 1) % 4;
-    cfg.rangeKm = presets[next];
-    pending = Action::SettingsChanged;
+  if (zoomMenu) {
+    int zoomDelta = (p.x - 145) * (p.x - 145) + (p.y - 235) * (p.y - 235) <= 45 * 45 ? -1
+                    : (p.x - 321) * (p.x - 321) + (p.y - 235) * (p.y - 235) <= 45 * 45 ? 1
+                                                                                           : 0;
+    if (zoomDelta) {
+      constexpr int presets[] = {50, 100, 150, 200, 250};
+      int current = 0;
+      for (int i = 1; i < int(sizeof(presets) / sizeof(presets[0])); ++i)
+        if (abs(cfg.rangeKm - presets[i]) < abs(cfg.rangeKm - presets[current]))
+          current = i;
+      cfg.rangeKm = presets[std::clamp(current + zoomDelta, 0,
+                                       int(sizeof(presets) / sizeof(presets[0])) - 1)];
+      pending = Action::SettingsChanged;
+    } else
+      zoomMenu = false;
     lastTap = 0;
     return;
   }

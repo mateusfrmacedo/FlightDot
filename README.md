@@ -20,7 +20,7 @@ Os voos só aparecem após conexão, sincronização do relógio e uma resposta 
 | Opção | Padrão | Intervalo / efeito |
 |---|---:|---|
 | Centro | sua cidade | Definido pela pesquisa de cidade ou aeroporto; nome e coordenadas ficam em NVS |
-| Alcance | 150 km | 10–250 km pela página; gestos alternam 50/100/150/250 km |
+| Alcance | 150 km | 10–250 km pela página ou pelos botões de zoom 50/100/150/200/250 km |
 | Visual | Fósforo verde | Único visual do radar |
 | Brilho | 150 | 10–255, fixo até nova alteração |
 | Dados atrasados | 20 s | 10–300 s |
@@ -44,8 +44,8 @@ A base `data/airports.json.gz` é enviada comprimida diretamente da flash e pesq
 
 - Toque em avião (ou linha na Lista): detalhes e consulta opcional de rota/tipo.
 - Toque no cartão: voltar.
-- Duplo toque no fundo: alcance 50 → 100 → 150 → 250 km.
-- Swipe horizontal: Radar / Lista / Estatísticas.
+- Deslize para a esquerda no Radar: abre o menu de zoom. Toque em `−` ou `+` para selecionar 50, 100, 150, 200 ou 250 km; deslize para a direita para fechá-lo.
+- As telas não mudam por swipe, evitando trocas causadas por leituras espúrias do touch.
 - Toque no rodapé da Lista: próxima página de aeronaves.
 
 O radar tem norte para cima e indicadores N/S/L/O nas bordas, quatro anéis com traços de 5–6 px, raio visual de 228 px e varredura contínua em degradê. Os números de distância, o alcance e a quantidade de voos foram retirados da tela principal; alcance e total recebido aparecem em **Estatísticas**. Uma rotação direta no buffer DMA deixa a USB-C na parte de baixo sem a espera síncrona da rotação genérica do LVGL. Aviões, helicópteros (A7), balões/dirigíveis (B2) e drones (B6) têm desenhos distintos. O único visual é fósforo verde.
