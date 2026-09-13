@@ -86,8 +86,6 @@ void begin(Settings &s) {
     d["lon"] = config->lon;
     d["rangeKm"] = config->rangeKm;
     d["brightness"] = config->brightness;
-    d["staleSeconds"] = config->staleSeconds;
-    d["timezone"] = config->timezone;
     d["centerName"] = config->centerName;
     d["sweep"] = config->sweep;
     d["autoDim"] = config->autoDim;
@@ -105,16 +103,10 @@ void begin(Settings &s) {
       return;
     Settings s = *config;
     bool ok = number("lat", s.lat) && number("lon", s.lon) && integer("rangeKm", s.rangeKm) &&
-              integer("brightness", s.brightness) &&
-              integer("staleSeconds", s.staleSeconds);
+              integer("brightness", s.brightness);
     s.theme = 0;
-    String z = server.arg("timezone");
-    if (z.isEmpty() || z.length() >= sizeof(s.timezone))
-      ok = false;
-    for (char c : z)
-      if (!isalnum((unsigned char)c) && String("<>+-:,./").indexOf(c) < 0)
-        ok = false;
-    snprintf(s.timezone, sizeof(s.timezone), "%s", z.c_str());
+    s.staleSeconds = 20;
+    snprintf(s.timezone, sizeof(s.timezone), "%s", "<-03>3");
     String center = server.arg("centerName");
     if (center.isEmpty() || center.length() >= sizeof(s.centerName))
       ok = false;
@@ -125,7 +117,7 @@ void begin(Settings &s) {
     s.sweep = server.arg("sweep") == "1";
     s.autoDim = false;
     if (!ok || !validSettings(s)) {
-      server.send(400, "text/plain", "Valores invalidos. Verifique coordenadas, alcance e fuso.");
+      server.send(400, "text/plain", "Valores invalidos. Verifique coordenadas e alcance.");
       return;
     }
     if (!storage::save(s)) {

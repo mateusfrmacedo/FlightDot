@@ -52,6 +52,8 @@ Settings load() {
     snprintf(s.centerName, sizeof(s.centerName), "Orindiúva");
   s.theme = 0;
   s.autoDim = false; // Retain the stored layout while retiring automatic dimming.
+  s.staleSeconds = 20;
+  snprintf(s.timezone, sizeof(s.timezone), "%s", "<-03>3");
   return validSettings(s) ? s : Settings{};
 }
 bool save(const Settings &s) {
