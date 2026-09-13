@@ -58,6 +58,10 @@ void tick() {
   wasOnline = online;
 }
 void connect(const char *ssid, const char *password) {
+  // Persist the replacement credentials, then leave the current AP only after
+  // the HTTP handler has sent its response to the browser.
+  WiFi.persistent(true);
+  WiFi.disconnect(false, false);
   WiFi.begin(ssid, password);
   started = millis();
 }

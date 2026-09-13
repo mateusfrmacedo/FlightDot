@@ -105,6 +105,11 @@ void begin(Settings &s) {
     d["autoDim"] = config->autoDim;
     d["token"] = token;
     d["portal"] = wifiManager::portal();
+    d["ssid"] = WiFi.SSID();
+    if (WiFi.status() == WL_CONNECTED)
+      d["rssi"] = WiFi.RSSI();
+    else
+      d["rssi"] = nullptr;
     json(d);
   });
   server.on("/api/config", HTTP_POST, [] {
@@ -157,6 +162,11 @@ void begin(Settings &s) {
       d["target"]["lon"] = tracked.lon;
     }
     d["wifi"] = state.wifi;
+    d["ssid"] = WiFi.SSID();
+    if (state.wifi)
+      d["rssi"] = WiFi.RSSI();
+    else
+      d["rssi"] = nullptr;
     d["count"] = flights;
     d["provider"] = provider;
     d["error"] = state.error;
