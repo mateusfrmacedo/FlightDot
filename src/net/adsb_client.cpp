@@ -170,6 +170,7 @@ static Route enrich(const Aircraft &a) {
     filter["response"]["aircraft"]["manufacturer"] = true;
     filter["response"]["flightroute"]["airline"]["name"] = true;
     filter["response"]["flightroute"]["origin"]["icao_code"] = true;
+    filter["response"]["flightroute"]["origin"]["name"] = true;
     filter["response"]["flightroute"]["origin"]["latitude"] = true;
     filter["response"]["flightroute"]["origin"]["longitude"] = true;
     filter["response"]["flightroute"]["destination"]["icao_code"] = true;
@@ -183,6 +184,8 @@ static Route enrich(const Aircraft &a) {
                doc["response"]["aircraft"]["manufacturer"] | "");
       snprintf(r.origin, sizeof(r.origin), "%s",
                doc["response"]["flightroute"]["origin"]["icao_code"] | "");
+      snprintf(r.originName, sizeof(r.originName), "%s",
+               doc["response"]["flightroute"]["origin"]["name"] | "");
       snprintf(r.destination, sizeof(r.destination), "%s",
                doc["response"]["flightroute"]["destination"]["icao_code"] | "");
       snprintf(r.airline, sizeof(r.airline), "%s",

@@ -49,11 +49,22 @@ void details(lv_draw_ctx_t *c, const Aircraft &a, const Route &r, int radarRange
       snprintf(duration, sizeof(duration), "%dh%02d", int(flightHours), int(flightHours * 60) % 60);
     }
   }
-  char routeLine[120];
-  snprintf(routeLine, sizeof(routeLine), "%s  >  %s%s%s", r.origin[0] ? r.origin : "---",
-           r.destination[0] ? r.destination : "---", r.destinationCity[0] ? "  " : "",
-           r.destinationCity);
-  text(c, 38, 105, 390, routeLine, 0xffe69a, 18, LV_TEXT_ALIGN_CENTER);
+  const char *originName = r.originName[0] ? r.originName : (r.origin[0] ? r.origin : "---");
+  const char *destinationName =
+      r.destinationName[0] ? r.destinationName
+                           : (r.destinationCity[0] ? r.destinationCity
+                                                   : (r.destination[0] ? r.destination : "---"));
+  char originText[64], destinationText[64], routeLine[160];
+  if (r.originName[0] && r.origin[0])
+    snprintf(originText, sizeof(originText), "%.34s (%s)", originName, r.origin);
+  else
+    snprintf(originText, sizeof(originText), "%.40s", originName);
+  if (r.destinationName[0] && r.destination[0])
+    snprintf(destinationText, sizeof(destinationText), "%.34s (%s)", destinationName, r.destination);
+  else
+    snprintf(destinationText, sizeof(destinationText), "%.40s", destinationName);
+  snprintf(routeLine, sizeof(routeLine), "Origem: %s\nDestino: %s", originText, destinationText);
+  text(c, 32, 96, 402, routeLine, 0xffe69a, 12, LV_TEXT_ALIGN_CENTER);
 
   char b[640];
   snprintf(b, sizeof(b),
@@ -65,7 +76,7 @@ void details(lv_draw_ctx_t *c, const Aircraft &a, const Route &r, int radarRange
            r.type[0] ? r.type : (a.type[0] ? a.type : "Consultando"), a.altitude * .3048f,
            a.altitude, a.speed * 1.852f, a.speed, a.distance, a.distance / 1.852f, radarRangeKm,
            a.heading, a.squawk[0] ? a.squawk : "--", arrival, duration);
-  text(c, 28, 132, 410, b, emergency(a) ? 0xff7777 : color, 17, LV_TEXT_ALIGN_CENTER);
+  text(c, 28, 140, 410, b, emergency(a) ? 0xff7777 : color, 17, LV_TEXT_ALIGN_CENTER);
   text(c, 85, 442, 296, "Toque para voltar", 0xb8c9be, 12, LV_TEXT_ALIGN_CENTER);
 }
 } // namespace ui
