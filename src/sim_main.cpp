@@ -47,8 +47,6 @@ int main(int argc, char **argv) {
   };
   lv_indev_drv_register(&in);
   Settings s;
-  if (argc > 2)
-    s.theme = std::clamp(atoi(argv[2]), 0, 4);
   ui::begin(s);
   Status status;
   status.wifi = true;

@@ -97,7 +97,6 @@ void begin(Settings &s) {
     d["lat"] = config->lat;
     d["lon"] = config->lon;
     d["rangeKm"] = config->rangeKm;
-    d["theme"] = config->theme;
     d["brightness"] = config->brightness;
     d["staleSeconds"] = config->staleSeconds;
     d["timezone"] = config->timezone;
@@ -113,8 +112,9 @@ void begin(Settings &s) {
       return;
     Settings s = *config;
     bool ok = number("lat", s.lat) && number("lon", s.lon) && integer("rangeKm", s.rangeKm) &&
-              integer("theme", s.theme) && integer("brightness", s.brightness) &&
+              integer("brightness", s.brightness) &&
               integer("staleSeconds", s.staleSeconds);
+    s.theme = 0;
     String z = server.arg("timezone");
     if (z.isEmpty() || z.length() >= sizeof(s.timezone))
       ok = false;

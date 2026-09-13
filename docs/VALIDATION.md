@@ -43,7 +43,8 @@ Uma transferência OTA desta revisão foi interrompida; a atualização foi conc
 
 - A tela usa a rotação LVGL `270°` adotada no exemplo oficial, com touch associado ao display rotacionado, para posicionar a USB-C na parte inferior.
 - Índice reduzido para 4.580 aeroportos médios e grandes; cidades vizinhas foram removidas integralmente do mapa. A seleção mantém até 56 aeroportos próximos e mostra até 12 nomes/códigos sem colisão por quadro. `Rio Preto SBSR` está coberto pelo teste geográfico.
-- Os temas fósforo, âmbar, vermelho, azul e verde neon foram compilados e inspecionados no simulador. O antigo tema de grade pontilhada foi removido e a configuração NVS é migrada automaticamente.
+- O firmware usa somente o visual fósforo verde; o seletor web e a troca por toque longo foram removidos. Configurações antigas são normalizadas para o visual único ao iniciar.
+- O touch FT3168 agora exige 35 ms de estado estável. A mudança entre Radar, Lista e Estatísticas exige gesto claramente horizontal de pelo menos 85 px; deslocamentos verticais ou leituras isoladas não mudam a tela.
 - O cartão selecionado foi inspecionado em `artifacts/flightdot-details.png`: conteúdo centralizado, texto ampliado, selo maior, cidade de destino, ETA/tempo de voo estimados e temperatura atual do destino. O HUD não é desenhado sobre o cartão.
 - A tela principal foi inspecionada sem trajetórias, pontos de aeroporto, números de distância, contador ou alcance. A interpolação usa posições preparadas uma vez por atualização e limita a quantidade desenhada nos maiores alcances.
 - Categorias ADS-B A7, B2 e B6 são desenhadas como helicóptero, balão/dirigível e drone. Companhia/categoria recebe selo textual; imagens de marcas não fazem parte do binário.

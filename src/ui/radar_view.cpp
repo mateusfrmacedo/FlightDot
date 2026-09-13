@@ -28,18 +28,9 @@ static int landmarkRange = -1;
 static uint32_t splashStart = 0;
 static bool splashDone = false;
 
-static uint32_t themeGrid() {
-  const uint32_t colors[] = {0x185e42, 0x684a12, 0x691d26, 0x173d75, 0x087a42};
-  return colors[std::clamp(cfg.theme, 0, 4)];
-}
-static uint32_t themeBeam() {
-  const uint32_t colors[] = {0x76ff73, 0xffc257, 0xff354d, 0x48a6ff, 0x00ff72};
-  return colors[std::clamp(cfg.theme, 0, 4)];
-}
-static uint32_t themeText() {
-  const uint32_t colors[] = {0x73ffab, 0xffb64a, 0xff6273, 0x78beff, 0x36ff91};
-  return colors[std::clamp(cfg.theme, 0, 4)];
-}
+static constexpr uint32_t GRID_COLOR = 0x185e42;
+static constexpr uint32_t BEAM_COLOR = 0x76ff73;
+static constexpr uint32_t TEXT_COLOR = 0x73ffab;
 void text(lv_draw_ctx_t *c, int x, int y, int w, const char *value, uint32_t color, int size,
           lv_text_align_t align) {
   lv_draw_label_dsc_t d;
@@ -105,8 +96,7 @@ static size_t renderedAircraftCount() {
   return std::min(data.count, limit);
 }
 static void radar(lv_draw_ctx_t *c, uint32_t color) {
-  uint32_t grid = themeGrid();
-  drawScope(c, grid, themeBeam(), timeMs, cfg.sweep, false);
+  drawScope(c, GRID_COLOR, BEAM_COLOR, timeMs, cfg.sweep, false);
   text(c, 218, 14, 30, "N", color, 18, LV_TEXT_ALIGN_CENTER);
   text(c, 218, 431, 30, "S", color, 18, LV_TEXT_ALIGN_CENTER);
   text(c, 432, 221, 28, "L", color, 18, LV_TEXT_ALIGN_CENTER);
@@ -166,10 +156,6 @@ static void radar(lv_draw_ctx_t *c, uint32_t color) {
     pointX[i] = x;
     pointY[i] = y;
     uint32_t tint = emergency(a)         ? 0xff5353
-                    : cfg.theme == 1     ? 0xffbb4b
-                    : cfg.theme == 2     ? 0xff7180
-                    : cfg.theme == 3     ? 0x83c8ff
-                    : cfg.theme == 4     ? 0x35ff88
                     : a.altitude < 10000 ? 0xffdf72
                     : a.altitude < 25000 ? 0x68ffa1
                                          : 0xaddfff;
@@ -276,7 +262,7 @@ static void splash(lv_draw_ctx_t *c) {
 }
 static void draw(lv_event_t *e) {
   auto c = lv_event_get_draw_ctx(e);
-  uint32_t color = themeText();
+  uint32_t color = TEXT_COLOR;
   if (!splashDone) {
     splash(c);
     return;
@@ -333,15 +319,16 @@ static void input(lv_event_t *e) {
   lv_obj_invalidate(root);
   int dx = p.x - down.x, dy = p.y - down.y;
   uint32_t held = timeMs - pressed;
-  if (abs(dx) > 65 || abs(dy) > 65) {
+  // Only a deliberate horizontal gesture changes the view. Previously any
+  // vertical displacement over 65 px also switched screens, making a noisy
+  // touch sample look like an automatic Radar/List/Statistics change.
+  if (abs(dx) >= 85 && abs(dx) > abs(dy) * 2 && held < 1200) {
     detail = false;
     view = (view + (dx < 0 ? 1 : 2)) % 3;
     lastTap = 0;
     return;
   }
-  if (held > 750) {
-    cfg.theme = (cfg.theme + 1) % 5;
-    pending = Action::SettingsChanged;
+  if (held < 45 || held > 1000 || abs(dy) >= 85) {
     lastTap = 0;
     return;
   }
@@ -390,6 +377,7 @@ static void input(lv_event_t *e) {
 }
 void begin(const Settings &s) {
   cfg = s;
+  cfg.theme = 0;
   refreshLandmarks(true);
   root = lv_scr_act();
   lv_obj_set_style_bg_color(root, lv_color_black(), 0);
@@ -445,6 +433,7 @@ void setSettings(const Settings &s) {
     detail = false;
   }
   cfg = s;
+  cfg.theme = 0;
   refreshLandmarks(true);
   lv_obj_invalidate(root);
 }

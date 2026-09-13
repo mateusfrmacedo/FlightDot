@@ -50,16 +50,19 @@ Settings load() {
   p.end();
   if (!strcmp(s.centerName, "Centro salvo") || !strcmp(s.centerName, "Orindiuva"))
     snprintf(s.centerName, sizeof(s.centerName), "Orindiúva");
+  s.theme = 0;
   s.autoDim = false; // Retain the stored layout while retiring automatic dimming.
   return validSettings(s) ? s : Settings{};
 }
 bool save(const Settings &s) {
-  if (!validSettings(s))
+  Settings saved = s;
+  saved.theme = 0;
+  if (!validSettings(saved))
     return false;
   Preferences p;
   if (!p.begin("plano", false))
     return false;
-  bool ok = p.putBytes("settings", &s, sizeof(s)) == sizeof(s);
+  bool ok = p.putBytes("settings", &saved, sizeof(saved)) == sizeof(saved);
   if (ok)
     p.putUInt("version", 3);
   p.end();

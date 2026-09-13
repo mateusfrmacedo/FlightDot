@@ -11,7 +11,7 @@ Radar ADS-B pessoal com Arduino, PlatformIO e LVGL, para **Waveshare ESP32-S3-To
 1. Ligado por USB ou bateria .  atravessando lentamente a tela antes de abrir o radar. No primeiro uso, conecte o celular à rede **FlightDot-Setup**.
 2. O portal deve abrir automaticamente. Se não abrir, acesse **http://192.168.4.1/**. Informe o nome e a senha da sua rede **2,4 GHz**.
 3. Volte à rede de casa e abra **http://flightdot.local/**. Se o roteador não oferecer mDNS, use o IP informado pelo monitor serial.
-4. A página permite pesquisar cidade/aeroporto, seguir um voo e mudar alcance (10–250 km), tema, brilho, fuso e limite de atraso. O minimapa e os campos manuais de latitude/longitude foram retirados.
+4. A página permite pesquisar cidade/aeroporto, seguir um voo e mudar alcance (10–250 km), brilho, fuso e limite de atraso. O minimapa e os campos manuais de latitude/longitude foram retirados.
 
 Os voos só aparecem após conexão, sincronização do relógio e uma resposta válida da API. **Zero aeronaves é um resultado válido**; a cobertura depende dos receptores da região. Falhas preservam a última posição e mostram `DADOS ATRASADOS` depois do limite configurado (padrão: 20 s). O ambiente `mock` é explicitamente marcado como demonstração e nunca é ativado automaticamente em caso de erro da API.
 
@@ -21,7 +21,7 @@ Os voos só aparecem após conexão, sincronização do relógio e uma resposta 
 |---|---:|---|
 | Centro | sua cidade | Definido pela pesquisa de cidade ou aeroporto; nome e coordenadas ficam em NVS |
 | Alcance | 150 km | 10–250 km pela página; gestos alternam 50/100/150/250 km |
-| Tema | Fósforo verde | Fósforo, âmbar, vermelho, azul ou verde neon |
+| Visual | Fósforo verde | Único visual do radar |
 | Brilho | 150 | 10–255, fixo até nova alteração |
 | Dados atrasados | 20 s | 10–300 s |
 | Varredura | Ligada | Habilita o feixe e seu rastro em degradê |
@@ -45,11 +45,10 @@ A base `data/airports.json.gz` é enviada comprimida diretamente da flash e pesq
 - Toque em avião (ou linha na Lista): detalhes e consulta opcional de rota/tipo.
 - Toque no cartão: voltar.
 - Duplo toque no fundo: alcance 50 → 100 → 150 → 250 km.
-- Toque longo: alterna entre os cinco temas.
 - Swipe horizontal: Radar / Lista / Estatísticas.
 - Toque no rodapé da Lista: próxima página de aeronaves.
 
-O radar tem norte para cima e indicadores N/S/L/O nas bordas, quatro anéis com traços de 5–6 px, raio visual de 228 px e varredura contínua em degradê. Os números de distância, o alcance e a quantidade de voos foram retirados da tela principal; alcance e total recebido aparecem em **Estatísticas**. Uma rotação direta no buffer DMA deixa a USB-C na parte de baixo sem a espera síncrona da rotação genérica do LVGL. Aviões, helicópteros (A7), balões/dirigíveis (B2) e drones (B6) têm desenhos distintos. Os cinco temas são fósforo verde, âmbar, vermelho, azul e verde neon.
+O radar tem norte para cima e indicadores N/S/L/O nas bordas, quatro anéis com traços de 5–6 px, raio visual de 228 px e varredura contínua em degradê. Os números de distância, o alcance e a quantidade de voos foram retirados da tela principal; alcance e total recebido aparecem em **Estatísticas**. Uma rotação direta no buffer DMA deixa a USB-C na parte de baixo sem a espera síncrona da rotação genérica do LVGL. Aviões, helicópteros (A7), balões/dirigíveis (B2) e drones (B6) têm desenhos distintos. O único visual é fósforo verde.
 
 A flash contém 4.580 aeroportos médios e grandes gerados do OurAirports. O mapa não desenha cidades vizinhas nem aeroportos pequenos: mostra apenas o nome do centro pesquisado e até oito aeroportos relevantes, em formato `Rio Preto  SBSR`. Os aeroportos aparecem como texto, sem bolinhas ou símbolos. Até 56 candidatos próximos são avaliados para evitar colisão entre os rótulos. Atualize o índice com `python scripts/build_places.py`.
 

@@ -17,7 +17,7 @@ bool emergency(const Aircraft &a) {
 }
 bool validSettings(const Settings &s) {
   return std::isfinite(s.lat) && std::isfinite(s.lon) && fabs(s.lat) <= 90 && fabs(s.lon) <= 180 &&
-         s.rangeKm >= 10 && s.rangeKm <= 250 && s.theme >= 0 && s.theme <= 4 &&
+         s.rangeKm >= 10 && s.rangeKm <= 250 && s.theme == 0 &&
          s.brightness >= 10 && s.brightness <= 255 && s.utcOffsetMinutes >= -840 &&
          s.utcOffsetMinutes <= 840 && s.staleSeconds >= 10 && s.staleSeconds <= 300 &&
          memchr(s.timezone, 0, sizeof(s.timezone)) && memchr(s.centerName, 0, sizeof(s.centerName));
