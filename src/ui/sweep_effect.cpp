@@ -7,7 +7,8 @@ namespace {
 constexpr int SIZE = 466, CENTER = 233, RADIUS = 228;
 constexpr int ANGLES = 1024, LEVELS = 256, GRID_LEVELS = 16;
 constexpr uint32_t REVOLUTION_MS = 6000;
-// Packed geometry: 10 angle bits, 4 grid-coverage bits, 1 sweep-coverage bit.
+// Packed geometry: 10 angle bits, 4 grid-coverage bits, 1 sweep-coverage bit,
+// and 1 bright outer-bezel bit.
 // Geometry is allocated in PSRAM.
 uint16_t *geometry = nullptr;
 lv_color_t palette[GRID_LEVELS][LEVELS];
@@ -24,9 +25,12 @@ void prepareGeometry() {
     for (int x = 0; x < SIZE; ++x) {
       float dx = x - CENTER, dy = y - CENTER;
       float radius = sqrtf(dx * dx + dy * dy), coverage = 0;
+      bool outerBezel = false;
       if (radius <= RADIUS + 3) {
         for (int ring = 57; ring <= RADIUS; ring += 57) {
-          float halfWidth = ring == RADIUS ? 1.5f : 1.f;
+          float halfWidth = ring == RADIUS ? 3.f : 1.f;
+          if (ring == RADIUS)
+            outerBezel = fabsf(radius - ring) <= halfWidth + .5f;
           coverage =
               std::max(coverage, std::clamp(halfWidth + .5f - fabsf(radius - ring), 0.f, 1.f));
         }
@@ -39,7 +43,8 @@ void prepareGeometry() {
       }
       int angle = int(lroundf(atan2f(dx, -dy) * (ANGLES / 6.283185307f))) & (ANGLES - 1);
       unsigned band = radius <= RADIUS - 2 ? 1 : 0;
-      geometry[y * SIZE + x] = angle | (int(lroundf(coverage * 15)) << 10) | (band << 14);
+      geometry[y * SIZE + x] = angle | (int(lroundf(coverage * 15)) << 10) | (band << 14) |
+                                (outerBezel << 15);
     }
   }
   // Video reference: bright narrow front, continuous ~55-degree afterglow.
@@ -82,6 +87,7 @@ void drawScope(lv_draw_ctx_t *context, uint32_t grid, uint32_t beam, uint32_t no
   int y1 = std::max(0, int(clip.y1)), y2 = std::min(SIZE - 1, int(clip.y2));
   int stride = lv_area_get_width(&buffer);
   int phase = (now % REVOLUTION_MS) * ANGLES / REVOLUTION_MS;
+  lv_color_t brightBeam = lv_color_hex(beam);
   // Paint only the current LVGL clip into its RGB565 draw buffer. The hot path
   // uses lookups, without transforms, masks, trig or per-pixel alpha arithmetic.
   for (int y = y1; y <= y2; ++y) {
@@ -89,7 +95,11 @@ void drawScope(lv_draw_ctx_t *context, uint32_t grid, uint32_t beam, uint32_t no
     const uint16_t *sample = geometry + y * SIZE + x1;
     for (int x = x1; x <= x2; ++x) {
       unsigned value = *sample++;
-      unsigned band = value >> 14, g = (value >> 10) & 15;
+      unsigned band = (value >> 14) & 1, outerBezel = value >> 15, g = (value >> 10) & 15;
+      if (outerBezel) {
+        *out++ = brightBeam;
+        continue;
+      }
       if (dots) {
         // Keep the outer bezel and replace rings/crosshairs with a regular
         // phosphor dot matrix. CENTER is itself a dot.
