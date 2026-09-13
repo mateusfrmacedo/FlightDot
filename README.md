@@ -27,7 +27,7 @@ Os voos só aparecem após conexão, sincronização do relógio e uma resposta 
 | Varredura | Ligada | Habilita o feixe e seu rastro em degradê |
 | Fuso | `<-03>3` | Regra POSIX; a página pode usar o fuso informado pelo navegador |
 
-As configurações e a senha OTA ficam em NVS. Na página de configuração, **Buscar redes disponíveis** lista os SSIDs próximos com barras de sinal; ao selecionar uma rede, informar a senha e salvar, as credenciais ficam armazenadas pela pilha Wi-Fi do ESP32 para os próximos boots e não aparecem no código-fonte. O firmware usa `FlightDot-Setup`, `flightdot.local`, servidor HTTP na porta 80 e consultas HTTPS externas.
+As configurações ficam em NVS. Na página de configuração, **Buscar redes disponíveis** lista os SSIDs próximos com barras de sinal; ao selecionar uma rede, informar a senha e salvar, as credenciais ficam armazenadas pela pilha Wi-Fi do ESP32 para os próximos boots e não aparecem no código-fonte. O firmware usa `FlightDot-Setup`, `flightdot.local`, servidor HTTP na porta 80 e consultas HTTPS externas.
 
 ## Pesquisar um local ou seguir um voo
 
@@ -75,7 +75,7 @@ pio device list
 pio run -e radar -t upload --upload-port /dev/cu.usbmodem1101
 ```
 
-Ambiente padrão `radar`. A definição genérica `esp32-s3-devkitc-1` recebe overrides explícitos para flash 16 MB, PSRAM OPI, Arduino `qio_opi` e duas partições OTA de 6 MB. O nome informativo da placa no PlatformIO pode continuar mencionando N8; os overrides e os tamanhos impressos no boot são a configuração efetiva. Versões fixadas: pioarduino 53.03.13 / Arduino 3.1.3 / LVGL 8.4.0 / ArduinoJson 6.21.5.
+Ambiente padrão `radar`. A definição genérica `esp32-s3-devkitc-1` recebe overrides explícitos para flash 16 MB, PSRAM OPI, Arduino `qio_opi` e duas partições de aplicativo de 6 MB. O nome informativo da placa no PlatformIO pode continuar mencionando N8; os overrides e os tamanhos impressos no boot são a configuração efetiva. Versões fixadas: pioarduino 53.03.13 / Arduino 3.1.3 / LVGL 8.4.0 / ArduinoJson 6.21.5.
 
 ### Pinagem da Waveshare 1.43
 
@@ -145,12 +145,6 @@ Configurações e cache usam namespaces separados em NVS. Credenciais Wi-Fi são
 
 O brilho permanece fixo no valor configurado; não há escurecimento por inatividade. O campo legado `autoDim` é forçado a falso ao carregar configurações, preservando o restante da estrutura NVS. A tela principal mostra hora, data e somente avisos necessários; contador, alcance, `Wi-Fi`, `Vsys` e endereço local foram retirados do HUD. O estado da rede e as contagens permanecem disponíveis na página ou em Estatísticas. Sleep por orientação/IMU não foi implementado (opcional). Não há áudio nesta implementação.
 
-## OTA pela página local
-
-Compile `pio run -e radar` e selecione `.pio/build/radar/firmware.bin` em **Atualizar firmware**. O usuário é `admin`; a senha individual persistente aparece na serial no boot. Não use `bootloader.bin`, `partitions.bin` nem imagem de outra placa.
-
-A página exige token de sessão nas alterações e senha para OTA. Firmware é gravado na partição inativa; falha de upload não seleciona a imagem incompleta. Não há rollback automático por falha lógica após boot nem assinatura de firmware; OTA deve ser usado na rede local confiável. Uma atualização interrompida não substitui a partição em execução.
-
 ## Arquivos
 
 | Caminho | Responsabilidade |
@@ -158,7 +152,7 @@ A página exige token de sessão nas alterações e senha para OTA. Firmware é 
 | `src/hardware/` | AMOLED, touch, RTC e tensão |
 | `lib/WavesharePanel/` | Transporte e identificação oficiais Waveshare |
 | `src/core/` | Modelos, geografia, parser, mock e storage NVS |
-| `src/net/` | Wi-Fi/captive portal, ADS-B/rotas, servidor de configuração/OTA |
+| `src/net/` | Wi-Fi/captive portal, ADS-B/rotas e servidor de configuração |
 | `src/ui/` | Radar, lista, detalhes, estatísticas e gestos |
 | `src/sim_main.cpp` | Simulador desktop SDL2 |
 | `test/test_core/` | Testes do parser, geografia e validação |

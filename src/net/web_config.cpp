@@ -4,17 +4,14 @@
 #include "web_page.h"
 #include "wifi_manager.h"
 #include <ArduinoJson.h>
-#include <Preferences.h>
-#include <Update.h>
 #include <WebServer.h>
 #include <WiFi.h>
 #include <cstdlib>
 namespace webConfig {
 static WebServer server(80);
 static Settings *config;
-static bool dirty = false, updating = false, otaFailed = false;
-static String token, password;
-static uint32_t reboot = 0;
+static bool dirty = false;
+static String token;
 static size_t flights = 0;
 static uint32_t updated = 0;
 static bool valid = false;
@@ -58,17 +55,8 @@ void begin(Settings &s) {
   snprintf(b, sizeof(b), "%08lx%08lx%08lx%08lx", (unsigned long)esp_random(),
            (unsigned long)esp_random(), (unsigned long)esp_random(), (unsigned long)esp_random());
   token = b;
-  Preferences p;
-  p.begin("plano", false);
-  password = p.getString("otaPass", "");
-  if (password.isEmpty()) {
-    password = token.substring(0, 16);
-    p.putString("otaPass", password);
-  }
-  p.end();
-  Serial.printf("[web] OTA usuario=admin senha=%s\n", password.c_str());
-  const char *headers[] = {"X-Radar-Token", "Authorization"};
-  server.collectHeaders(headers, 2);
+  const char *headers[] = {"X-Radar-Token"};
+  server.collectHeaders(headers, 1);
   server.on("/", HTTP_GET, [] { server.send_P(200, "text/html; charset=utf-8", WEB_PAGE); });
   server.on("/api/airports", HTTP_GET, [] {
     server.sendHeader("Content-Encoding", "gzip");
@@ -226,48 +214,6 @@ void begin(Settings &s) {
     server.send(200, "text/plain", "Wi-Fi esquecido. Conecte ao FlightDot-Setup.");
     wifiManager::reset();
   });
-  server.on(
-      "/update", HTTP_POST,
-      [] {
-        if (!server.authenticate("admin", password.c_str())) {
-          server.requestAuthentication();
-          return;
-        }
-        if (!authorized())
-          return;
-        if (!updating || otaFailed || Update.hasError()) {
-          server.send(400, "text/plain", "Falha na atualizacao. Firmware anterior preservado.");
-          updating = false;
-          return;
-        }
-        server.send(200, "text/plain", "Atualizacao concluida. Reiniciando...");
-        reboot = millis() + 1500;
-      },
-      [] {
-        auto &u = server.upload();
-        if (u.status == UPLOAD_FILE_START) {
-          updating = false;
-          otaFailed = false;
-          if (!server.authenticate("admin", password.c_str()) || server.arg("token") != token) {
-            otaFailed = true;
-            return;
-          }
-          updating = Update.begin(UPDATE_SIZE_UNKNOWN, U_FLASH);
-          otaFailed = !updating;
-        } else if (u.status == UPLOAD_FILE_WRITE) {
-          if (updating && !otaFailed && Update.write(u.buf, u.currentSize) != u.currentSize) {
-            otaFailed = true;
-            Update.abort();
-          }
-        } else if (u.status == UPLOAD_FILE_END) {
-          if (updating && !otaFailed && !Update.end(true))
-            otaFailed = true;
-        } else if (u.status == UPLOAD_FILE_ABORTED) {
-          Update.abort();
-          updating = false;
-          otaFailed = true;
-        }
-      });
   server.onNotFound([] {
     if (wifiManager::portal()) {
       server.sendHeader("Location", "http://192.168.4.1/");
@@ -279,8 +225,6 @@ void begin(Settings &s) {
 }
 void tick() {
   server.handleClient();
-  if (reboot && int32_t(millis() - reboot) >= 0)
-    ESP.restart();
 }
 bool changed() {
   bool b = dirty;
