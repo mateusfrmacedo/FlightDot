@@ -2,6 +2,9 @@
 
 ![FlightDot running on the Waveshare 1.43-inch AMOLED](https://github.com/user-attachments/assets/a8eb5f1f-8bff-4143-9952-ea2f0b018ebf)
 
+<img width="3024" height="4032" alt="649612654-d71ea5cb-7e26-4aed-83c6-2a26e663732e" src="https://github.com/user-attachments/assets/02507c21-ebe2-4b46-b483-ebce86c113b0" />
+
+
 I built FlightDot as a small live ADS-B radar for the **Waveshare ESP32-S3-Touch-AMOLED-1.43**. It is made for the round 466×466 AMOLED board with 16 MB flash and 8 MB PSRAM.
 
 This is an internet-connected radar, not a radio receiver. The ESP32 connects to Wi-Fi and requests nearby aircraft from public ADS-B services.
