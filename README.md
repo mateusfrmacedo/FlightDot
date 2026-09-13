@@ -85,7 +85,7 @@ Ambiente padrão `radar`. A definição genérica `esp32-s3-devkitc-1` recebe ov
 | AMOLED QSPI D0/D1/D2/D3 | 11 / 12 / 13 / 14 |
 | AMOLED reset/enable | 21 / 42 |
 | I²C SDA/SCL | 47 / 48 |
-| Touch FT3168 | I²C `0x38` |
+| Touch FT3168 | I²C `0x38`, 300 kHz, leitura LVGL a cada 10 ms |
 | RTC PCF85063 | I²C `0x51`, IRQ 15 não usado |
 | IMU QMI8658 | IRQ 8 não usado |
 | Tensão VSYS | ADC GPIO4, divisor 200k/100k |
