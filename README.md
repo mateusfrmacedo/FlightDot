@@ -1,4 +1,4 @@
-# FlightDot
+# FlightDot ◉ ✈
 
 ![FlightDot running on the Waveshare 1.43-inch AMOLED](https://github.com/user-attachments/assets/a8eb5f1f-8bff-4143-9952-ea2f0b018ebf)
 
