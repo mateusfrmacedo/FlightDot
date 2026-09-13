@@ -357,7 +357,7 @@ static void input(lv_event_t *e) {
   // Accept taps only when the finger stayed nearly in the same position.
   // This rejects the jitter that the touch controller can emit on the shared
   // I2C bus while keeping ordinary taps responsive.
-  if (held < 70 || held > 900 || abs(dx) > 20 || abs(dy) > 20) {
+  if (held < 35 || held > 900 || abs(dx) > 20 || abs(dy) > 20) {
     lastTap = 0;
     return;
   }
