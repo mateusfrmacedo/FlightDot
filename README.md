@@ -1,178 +1,107 @@
-# FlightDot — radar ADS-B para ESP32-S3 AMOLED 1.43"
+# FlightDot
 
-**The sky in your pocket.**
-<img width="928" height="929" alt="demo" src="https://github.com/user-attachments/assets/a8eb5f1f-8bff-4143-9952-ea2f0b018ebf" />
+![FlightDot running on the Waveshare 1.43-inch AMOLED](https://github.com/user-attachments/assets/a8eb5f1f-8bff-4143-9952-ea2f0b018ebf)
 
-Radar ADS-B pessoal com Arduino, PlatformIO e LVGL, para **Waveshare ESP32-S3-Touch-AMOLED-1.43, 466×466, flash 16 MB, PSRAM OPI 8 MB**. Centro inicial: **Orindiúva (-20.183608, -49.354661)**; alcance **150 km**, incluindo São José do Rio Preto, a aproximadamente 70 km. Não é um receptor de rádio ADS-B: precisa de Wi-Fi e consulta serviços de dados pela internet.
-<img width="3024" height="4032" alt="IMG_4935" src="https://github.com/user-attachments/assets/d71ea5cb-7e26-4aed-83c6-2a26e663732e" />
+I built FlightDot as a small live ADS-B radar for the **Waveshare ESP32-S3-Touch-AMOLED-1.43**. It is made for the round 466×466 AMOLED board with 16 MB flash and 8 MB PSRAM.
 
-## Usar a placa
+This is an internet-connected radar, not a radio receiver. The ESP32 connects to Wi-Fi and requests nearby aircraft from public ADS-B services.
 
-1. Ligado por USB ou bateria .  atravessando lentamente a tela antes de abrir o radar. No primeiro uso, conecte o celular à rede **FlightDot-Setup**.
-2. O portal deve abrir automaticamente. Se não abrir, acesse **http://192.168.4.1/**. Informe o nome e a senha da sua rede **2,4 GHz**.
-3. Volte à rede de casa e abra **http://flightdot.local/**. Se o roteador não oferecer mDNS, use o IP informado pelo monitor serial.
-4. A página permite pesquisar cidade/aeroporto, seguir um voo e mudar alcance (10–250 km), brilho, fuso e limite de atraso. O minimapa e os campos manuais de latitude/longitude foram retirados.
+## What it does
 
-Os voos só aparecem após conexão, sincronização do relógio e uma resposta válida da API. **Zero aeronaves é um resultado válido**; a cobertura depende dos receptores da região. Falhas preservam a última posição e mostram `DADOS ATRASADOS` depois do limite configurado (padrão: 20 s). O ambiente `mock` é explicitamente marcado como demonstração e nunca é ativado automaticamente em caso de erro da API.
+- Shows nearby aircraft on a live green radar display.
+- Draws heading-aware aircraft icons, range rings, compass points, and a smooth sweep.
+- Opens a larger aircraft card with callsign, registration, manufacturer, model, altitude, speed, heading, squawk, and origin/destination cities.
+- Lets you search for a city, airport, flight number, or callsign from the local setup page.
+- Can follow a selected aircraft and keep the radar centred on it.
+- Stores the radar centre, range, brightness, sweep setting, and Wi-Fi credentials in NVS.
+- Includes a Wi-Fi setup portal, local configuration page, desktop LVGL/SDL2 simulator, and a mock-data build.
 
-## Configurações disponíveis
+The main screen stays intentionally simple. Radar range and aircraft count are available in the statistics view, while the web page is used for Wi-Fi, search, centre, range, and brightness.
 
-| Opção | Padrão | Intervalo / efeito |
-|---|---:|---|
-| Centro | sua cidade | Definido pela pesquisa de cidade ou aeroporto; nome e coordenadas ficam em NVS |
-| Alcance | 150 km | 10–250 km pela página ou pelos botões de zoom 50/100/150/200/250 km |
-| Visual | Fósforo verde | Único visual do radar |
-| Brilho | 150 | 10–255, fixo até nova alteração |
-| Dados atrasados | 20 s | 10–300 s |
-| Varredura | Ligada | Habilita o feixe e seu rastro em degradê |
-| Fuso | `<-03>3` | Regra POSIX; a página pode usar o fuso informado pelo navegador |
+## Hardware
 
-As configurações ficam em NVS. Na página de configuração, **Buscar redes disponíveis** lista os SSIDs próximos com barras de sinal; ao selecionar uma rede, informar a senha e salvar, as credenciais ficam armazenadas pela pilha Wi-Fi do ESP32 para os próximos boots e não aparecem no código-fonte. O firmware usa `FlightDot-Setup`, `flightdot.local`, servidor HTTP na porta 80 e consultas HTTPS externas.
+The firmware targets the Waveshare ESP32-S3-Touch-AMOLED-1.43 board. The display driver follows the official Waveshare Demo V3 and supports the panel detection used by this board. Touch uses the FT3168-compatible protocol over I²C at `0x38`.
 
-## Pesquisar um local ou seguir um voo
+| Function | Pin / address |
+| --- | --- |
+| AMOLED QSPI CS / clock | GPIO 9 / GPIO 10 |
+| AMOLED QSPI data | GPIO 11, 12, 13, 14 |
+| AMOLED reset / enable | GPIO 21 / GPIO 42 |
+| I²C SDA / SCL | GPIO 47 / GPIO 48 |
+| Touch | I²C `0x38` |
+| RTC | I²C `0x51` |
 
-Abra a seção **Pesquisar** na página local:
+More hardware notes are in [docs/HARDWARE.md](docs/HARDWARE.md).
 
-- **Cidade ou aeroporto**: digite o nome da cidade, nome do aeroporto, IATA (ex.: `SJP`) ou ICAO (`SBSR`). Clique em **Centralizar** no resultado; as coordenadas são salvas e um acompanhamento ativo é encerrado. A busca de cidades depende da internet do navegador e usa Open-Meteo/GeoNames, somente por envio do formulário, com cache de 24 h. A base local de aeroportos inclui os registros abertos do Brasil e aeroportos internacionais com código IATA.
-- **Seguir avião**: informe companhia e número (`LA3819`, `G31600`) ou callsign ICAO (`TAM3819`, `AZU4321`). O worker resolve o número comercial via adsbdb quando necessário. Para LA, consulta TAM e LAN juntos e só escolhe quando há uma única aeronave com posição recente. Mais de um resultado pede callsign exato; nenhuma posição disponível mantém o aviso de busca/perda de sinal.
-- Durante o acompanhamento, a tela mostra a aeronave selecionada centralizada e as referências geográficas se movem com ela. Depois da primeira identificação, as consultas usam o hexadecimal ICAO da mesma aeronave, inclusive fora do alcance da cidade salva. O centro original fica preservado em NVS. **Parar de seguir** retorna a ele.
-- Acompanhamento continua com o navegador fechado, mas termina ao reiniciar a placa. A posição recebida não é uma garantia de rota comercial: números compartilhados e diferenças de callsign podem exigir o identificador ICAO. Posições sem recepção recente não são inventadas.
+## First connection
 
-A base `data/airports.json.gz` é enviada comprimida diretamente da flash e pesquisada no navegador, sem carregar todos os aeroportos na RAM do ESP32. Para renovar a base: `python scripts/build_airports.py`, depois compile e grave novamente. Fontes: [OurAirports](https://ourairports.com/data/), [Open-Meteo](https://open-meteo.com/en/docs/geocoding-api), [adsbdb](https://github.com/mrjackwills/adsbdb) e [API adsb.fi](https://github.com/adsbfi/opendata).
+1. Flash the firmware and power the board.
+2. On first boot, connect your phone or computer to **FlightDot-Setup**.
+3. Open `http://192.168.4.1/` and select a nearby 2.4 GHz Wi-Fi network. Enter its password and save.
+4. Reconnect your phone or computer to the same home network, then open `http://flightdot.local/`.
 
-## Gestos
+If `flightdot.local` is not available on your network, use the IP address printed in the serial monitor.
 
-- Toque em avião (ou linha na Lista): detalhes e consulta opcional de rota/tipo.
-- Toque no cartão: voltar.
-- Deslize para a esquerda no Radar: abre o menu de zoom. Toque em `−` ou `+` para selecionar 50, 100, 150, 200 ou 250 km; deslize para a direita para fechá-lo.
-- As telas não mudam por swipe, evitando trocas causadas por leituras espúrias do touch.
-- Toque no rodapé da Lista: próxima página de aeronaves.
+The configuration page can scan for nearby Wi-Fi networks, set the radar centre by searching for a city or airport, change the range from 10 to 250 km, adjust brightness, enable or disable the sweep, and search for a flight to follow.
 
-O radar tem norte para cima e indicadores N/S/L/O nas bordas, quatro anéis com traços de 5–6 px, raio visual de 228 px e varredura contínua em degradê. Os números de distância, o alcance e a quantidade de voos foram retirados da tela principal; alcance e total recebido aparecem em **Estatísticas**. Uma rotação direta no buffer DMA deixa a USB-C na parte de baixo sem a espera síncrona da rotação genérica do LVGL. Aviões, helicópteros (A7), balões/dirigíveis (B2) e drones (B6) têm desenhos distintos. O único visual é fósforo verde.
+## Build and flash
 
-A flash contém 4.580 aeroportos médios e grandes gerados do OurAirports. O mapa não desenha cidades vizinhas nem aeroportos pequenos: mostra apenas o nome do centro pesquisado e até oito aeroportos relevantes, em formato `Rio Preto  SBSR`. Os aeroportos aparecem como texto, sem bolinhas ou símbolos. Até 56 candidatos próximos são avaliados para evitar colisão entre os rótulos. Atualize o índice com `python scripts/build_places.py`.
-
-O cartão centralizado da aeronave usa texto ampliado e mostra somente as cidades de origem e destino, matrícula, fabricante, modelo, altitude em metros e pés, velocidade em km/h e nós (`kt`), distância em quilômetros e milhas náuticas, alcance configurado do radar, rumo e squawk. Ele não classifica o voo como particular, serviço, linha aérea ou militar. A tela Estatísticas também informa o alcance atual e o total de aeronaves recebidas. ETA e tempo de voo são estimados pela distância e velocidade atuais; as APIs públicas usadas não fornecem horário operacional oficial. Logotipos gráficos oficiais não estão embutidos porque exigem um catálogo de imagens e licenças de marca.
-
-As fontes rápidas originais do LVGL recebem pequenos fallbacks `font_pt_16/18/24/28` com os glifos acentuados portugueses. Para regenerá-los depois de instalar as dependências do PlatformIO, execute `scripts/build_fonts.sh`; o gerador usa a Montserrat Medium distribuída com o LVGL.
-
-
-## Instalar ferramentas e compilar
+Install PlatformIO, then run:
 
 ```sh
 python3 -m venv .venv
 source .venv/bin/activate
 pip install platformio
-pio run
-pio run -t upload
+
+pio run -e radar
+pio run -e radar -t upload
 pio device monitor -b 115200
 ```
 
-porta foi `/dev/cu.usbmodem1101`; se necessário:
+If PlatformIO does not find the board automatically, list ports and pass the correct one:
 
 ```sh
 pio device list
-pio run -e radar -t upload --upload-port /dev/cu.usbmodem1101
+pio run -e radar -t upload --upload-port /dev/cu.usbmodemXXXX
 ```
 
-Ambiente padrão `radar`. A definição genérica `esp32-s3-devkitc-1` recebe overrides explícitos para flash 16 MB, PSRAM OPI, Arduino `qio_opi` e duas partições de aplicativo de 6 MB. O nome informativo da placa no PlatformIO pode continuar mencionando N8; os overrides e os tamanhos impressos no boot são a configuração efetiva. Versões fixadas: pioarduino 53.03.13 / Arduino 3.1.3 / LVGL 8.4.0 / ArduinoJson 6.21.5.
-
-### Pinagem da Waveshare 1.43
-
-| Função | GPIO / endereço |
-|---|---|
-| AMOLED QSPI CS/CLK | 9 / 10 |
-| AMOLED QSPI D0/D1/D2/D3 | 11 / 12 / 13 / 14 |
-| AMOLED reset/enable | 21 / 42 |
-| I²C SDA/SCL | 47 / 48 |
-| Touch FT3168 | I²C `0x38`, 300 kHz, leitura LVGL a cada 10 ms |
-| RTC PCF85063 | I²C `0x51`, IRQ 15 não usado |
-| IMU QMI8658 | IRQ 8 não usado |
-| Tensão VSYS | ADC GPIO4, divisor 200k/100k |
-
-O exemplar conectado identificou o painel pelo ramo CO5300 do Demo V3 oficial, com offset X de 6 pixels. O mesmo driver também contém o caminho SH8601 quando o ID `0x86` é detectado. Detalhes e fontes oficiais estão em [docs/HARDWARE.md](docs/HARDWARE.md).
-
-## Etapas de validação
+Useful development environments:
 
 ```sh
-# Teste mínimo: identificação do painel, RGB e coordenadas de toque na serial
-pio run -e display-test -t upload
-
-# Radar com 8 aviões simulados, sem consultar APIs
+# Radar with simulated aircraft, no network requests
 pio run -e mock -t upload
 
-# Firmware normal, sem voos inventados
-pio run -e radar -t upload
-
-# Parser, limites e geografia no computador
+# Native checks
 pio test -e test-native
-```
 
-## Simulador LVGL + SDL2
-
-Usa a **mesma UI C++** do firmware, com mouse simulando touch e dados fictícios.
-
-```sh
+# Desktop simulator (requires SDL2)
 brew install sdl2
 pio run -e native -t exec
 ```
 
-Captura sem janela, útil para revisar a interface:
+## Data sources
 
-```sh
-pio run -e native
-mkdir -p artifacts
-SDL_VIDEODRIVER=dummy .pio/build/native/program artifacts/radar.bmp
-```
+FlightDot tries these public ADS-B sources in order and backs off when a service fails or rate-limits requests:
 
-## APIs e memória
+- [airplanes.live](https://airplanes.live/)
+- [ADSB.lol](https://adsb.lol/)
+- [adsb.fi](https://adsb.fi/)
 
-- Consulta HTTPS de raio com `ceil(km / 1.852)` milhas náuticas. Uma requisição ADS-B por ciclo, **5 s depois do término da anterior**.
-- Prioridade inicial: `api.airplanes.live`; fallbacks: `api.adsb.lol` e `opendata.adsb.fi` (endpoint `/api/v3/lat/.../lon/.../dist/...`), mantendo o serviço que estiver funcionando.
-- No teste de 09/09/2026, airplanes.live retornou pedido de contato/liberação; adsb.lol retornou aeronaves na região. O firmware não depende de uma liberação do primeiro para continuar.
-- Falhas têm backoff progressivo de 5–60 s. HTTP 403/429 pausa o provedor por 10 minutos. Sem consultas paralelas ou retries em rajada.
-- Parser incremental: no máximo 2 MiB recebidos, 8 KiB por registro, documento filtrado de 4 KiB; mantém as **80 aeronaves mais próximas**. Descarta posições ausentes, inválidas, fora do alcance ou com `seen_pos > 60 s`. Não acumula o JSON completo na RAM. Respostas chunked inesperadas são rejeitadas (o cliente pede HTTP/1.0).
-- Para manter a animação fluida, a tela desenha até 80 aeronaves em alcances menores, 60 em 150–199 km e as 40 mais próximas em 200–250 km. Em 250 km aparecem no máximo 16 etiquetas de voo; Estatísticas continua mostrando o total coletado. A associação com a posição anterior ocorre uma vez por atualização, evitando buscas repetidas a cada quadro.
-- O alocador mbedTLS é configurado antes de iniciar o Wi-Fi para usar PSRAM, com fallback para RAM interna; os buffers DMA do AMOLED permanecem internos. Isso evita falhas de handshake por falta de blocos contíguos na RAM interna.
-- HTTPS valida um bundle de CAs; NTP/RTC válido é necessário. Veja [certs/README.md](certs/README.md).
-- Rede roda em worker FreeRTOS, separado do loop de LVGL. Troca snapshots por filas. Respostas de uma configuração de localização anterior são descartadas por geração.
-- adsbdb resolve números comerciais uma vez por busca e enriquece detalhes ao selecionar aeronave, no mesmo worker, com intervalo mínimo de 5 s entre consultas. Cache NVS de 24 slots, chave ICAO+callsign, TTL positivo 6 h e negativo 15 min; TTL requer relógio válido. Rota pode não estar disponível.
-- Objetos LVGL ficam na PSRAM; buffers DMA da tela ficam na RAM interna. Um mapa geométrico de cerca de 434 KB na PSRAM e tabelas de cor/opacidade permitem desenhar grade e varredura juntas diretamente no buffer LVGL, sem calcular trigonometria por pixel em cada quadro. A rotação de 270° é transposta uma vez para um buffer DMA fixo. A cada quadro, apenas as áreas da varredura e dos aviões em movimento são invalidadas. A lista de aeroportos só é recalculada quando o centro anda pelo menos 2 km ou o alcance muda. O HUD é transparente, sem caixas pretas atrás dos textos.
+[adsbdb](https://github.com/mrjackwills/adsbdb) is used when available to enrich selected aircraft with route and type information. Airport search data comes from [OurAirports](https://ourairports.com/data/), and city search is performed in the browser with [Open-Meteo Geocoding](https://open-meteo.com/en/docs/geocoding-api).
 
-## Configuração persistente, RTC e energia
+Coverage and aircraft details depend on the public data sources. No aircraft are invented when a provider is unavailable. Please use the services responsibly and respect their terms and rate limits.
 
-Configurações e cache usam namespaces separados em NVS. Credenciais Wi-Fi são mantidas pela pilha Wi-Fi do ESP32. O RTC PCF85063 guarda UTC e é atualizado após NTP. Fuso padrão POSIX `<-03>3` (São Paulo); o navegador sugere regras para fusos conhecidos ou offset fixo para outros. Para regiões com horário de verão, confira a regra POSIX.
+## Project layout
 
-O brilho permanece fixo no valor configurado; não há escurecimento por inatividade. O campo legado `autoDim` é forçado a falso ao carregar configurações, preservando o restante da estrutura NVS. A tela principal mostra hora, data e somente avisos necessários; contador, alcance, `Wi-Fi`, `Vsys` e endereço local foram retirados do HUD. O estado da rede e as contagens permanecem disponíveis na página ou em Estatísticas. Sleep por orientação/IMU não foi implementado (opcional). Não há áudio nesta implementação.
+| Path | Purpose |
+| --- | --- |
+| `src/hardware` | AMOLED, touch, RTC, and power hardware |
+| `src/net` | Wi-Fi portal, ADS-B client, and local web server |
+| `src/ui` | Radar, list, details, statistics, and gestures |
+| `src/core` | Data model, parser, storage, mock data, and location helpers |
+| `lib/WavesharePanel` | Waveshare/Espressif display support code |
+| `data` and `certs` | Airport index and HTTPS certificate bundle |
 
-## Arquivos
+## Credits
 
-| Caminho | Responsabilidade |
-|---|---|
-| `src/hardware/` | AMOLED, touch, RTC e tensão |
-| `lib/WavesharePanel/` | Transporte e identificação oficiais Waveshare |
-| `src/core/` | Modelos, geografia, parser, mock e storage NVS |
-| `src/net/` | Wi-Fi/captive portal, ADS-B/rotas e servidor de configuração |
-| `src/ui/` | Radar, lista, detalhes, estatísticas e gestos |
-| `src/sim_main.cpp` | Simulador desktop SDL2 |
-| `test/test_core/` | Testes do parser, geografia e validação |
-| `docs/HARDWARE.md` | Fontes, pinagem e leituras do exemplar testado |
-
-## Recuperação
-
-Se a porta desaparecer, segure BOOT, pressione/release RESET e solte BOOT; volte a executar upload. O backup completo anterior à primeira gravação está em `backups/original-16MB.bin` no workspace local. Para restaurar **inclusive NVS original**:
-
-```sh
-pip install esptool
-esptool --chip esp32s3 --port /dev/cu.usbmodem1101 write-flash 0 backups/original-16MB.bin
-```<img width="3024" height="4032" alt="IMG_4935" src="https://github.com/user-attachments/assets/290b548a-1a70-4a92-9436-a71f7c0fa802" />
-
-
-
-Isso substitui toda a flash e perde as configurações do FlightDot. SHA256 do backup: `ab03ee55fc258eea1bfb20bf6ea62f0ecdb77bd47b76a5099227df709e02d803`.
-
-Dados adicionais: [adsb.fi](https://adsb.fi/), uso pessoal e não comercial, conforme [termos da API](https://github.com/adsbfi/opendata).
-
-## Referências
-
-[Capsule Radar](https://github.com/socquique/capsule-radar) foi referência arquitetural e funcional. [Waveshare 1.43](https://www.waveshare.com/wiki/ESP32-S3-Touch-AMOLED-1.43) e seu Demo V3 foram a fonte dos drivers e da pinagem. Veja [THIRD_PARTY.md](THIRD_PARTY.md). As instruções adicionais do documento anexado foram tratadas como referência: não foram incorporados requisitos extras como quatro temas ou áudio que não constavam da solicitação principal. [Desk-Radar] https://github.com/acothebraco/desk-radar
+[Capsule Radar](https://github.com/socquique/capsule-radar) was a useful architectural reference. Hardware support is based on the official [Waveshare ESP32-S3-Touch-AMOLED-1.43 documentation](https://www.waveshare.com/wiki/ESP32-S3-Touch-AMOLED-1.43). Third-party components and data sources are listed in [THIRD_PARTY.md](THIRD_PARTY.md).
