@@ -28,7 +28,8 @@ static int landmarkRange = -1;
 static uint32_t splashStart = 0;
 static bool splashDone = false;
 
-static constexpr uint32_t GRID_COLOR = 0x185e42;
+// A lighter phosphor green keeps the thin scope lines visible on AMOLED black.
+static constexpr uint32_t GRID_COLOR = 0x31a875;
 static constexpr uint32_t BEAM_COLOR = 0x76ff73;
 static constexpr uint32_t TEXT_COLOR = 0x73ffab;
 void text(lv_draw_ctx_t *c, int x, int y, int w, const char *value, uint32_t color, int size,

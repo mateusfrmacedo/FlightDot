@@ -26,14 +26,15 @@ void prepareGeometry() {
       float radius = sqrtf(dx * dx + dy * dy), coverage = 0;
       if (radius <= RADIUS + 3) {
         for (int ring = 57; ring <= RADIUS; ring += 57) {
-          float halfWidth = ring == RADIUS ? 3.f : 2.5f;
+          float halfWidth = ring == RADIUS ? 1.5f : 1.f;
           coverage =
               std::max(coverage, std::clamp(halfWidth + .5f - fabsf(radius - ring), 0.f, 1.f));
         }
         if (radius <= RADIUS) {
-          coverage = std::max(coverage, std::clamp(3.f - std::min(fabsf(dx), fabsf(dy)), 0.f, 1.f));
+          coverage =
+              std::max(coverage, std::clamp(1.25f - std::min(fabsf(dx), fabsf(dy)), 0.f, 1.f));
           float diagonal = std::min(fabsf(dx - dy), fabsf(dx + dy)) * .70710678f;
-          coverage = std::max(coverage, std::clamp(3.f - diagonal, 0.f, 1.f) * .72f);
+          coverage = std::max(coverage, std::clamp(1.25f - diagonal, 0.f, 1.f) * .72f);
         }
       }
       int angle = int(lroundf(atan2f(dx, -dy) * (ANGLES / 6.283185307f))) & (ANGLES - 1);
