@@ -27,7 +27,7 @@ Os voos só aparecem após conexão, sincronização do relógio e uma resposta 
 | Varredura | Ligada | Habilita o feixe e seu rastro em degradê |
 | Fuso | `<-03>3` | Regra POSIX; a página pode usar o fuso informado pelo navegador |
 
-As configurações e a senha OTA ficam em NVS. As credenciais Wi-Fi são armazenadas pela pilha Wi-Fi do ESP32 e não aparecem no código-fonte. O firmware usa `FlightDot-Setup`, `flightdot.local`, servidor HTTP na porta 80 e consultas HTTPS externas.
+As configurações e a senha OTA ficam em NVS. Na página de configuração, **Buscar redes disponíveis** lista os SSIDs próximos com barras de sinal; ao selecionar uma rede, informar a senha e salvar, as credenciais ficam armazenadas pela pilha Wi-Fi do ESP32 para os próximos boots e não aparecem no código-fonte. O firmware usa `FlightDot-Setup`, `flightdot.local`, servidor HTTP na porta 80 e consultas HTTPS externas.
 
 ## Pesquisar um local ou seguir um voo
 

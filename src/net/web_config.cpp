@@ -192,6 +192,34 @@ void begin(Settings &s) {
                 "Conectando. Volte para sua rede e abra http://flightdot.local/");
     wifiManager::connect(ssid.c_str(), pass.c_str());
   });
+  server.on("/api/wifi/scan", HTTP_POST, [] {
+    if (!authorized())
+      return;
+    int result = WiFi.scanComplete();
+    if (result == WIFI_SCAN_RUNNING) {
+      server.send(202, "application/json", "{\"scanning\":true}");
+      return;
+    }
+    if (result < 0) {
+      WiFi.scanNetworks(true, true); // asynchronous: keep the settings page responsive
+      server.send(202, "application/json", "{\"scanning\":true}");
+      return;
+    }
+    StaticJsonDocument<4096> d;
+    d["scanning"] = false;
+    auto networks = d.createNestedArray("networks");
+    for (int i = 0; i < result && networks.size() < 20; ++i) {
+      String ssid = WiFi.SSID(i);
+      if (ssid.isEmpty())
+        continue;
+      auto network = networks.createNestedObject();
+      network["ssid"] = ssid;
+      network["rssi"] = WiFi.RSSI(i);
+      network["secure"] = WiFi.encryptionType(i) != WIFI_AUTH_OPEN;
+    }
+    WiFi.scanDelete();
+    json(d);
+  });
   server.on("/api/reset-wifi", HTTP_POST, [] {
     if (!authorized())
       return;
