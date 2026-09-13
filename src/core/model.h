@@ -37,8 +37,7 @@ inline void clearSnapshot(Snapshot &s) {
 }
 struct Route {
   char hex[12]{}, callsign[20]{}, origin[12]{}, destination[12]{}, type[64]{};
-  char manufacturer[48]{}, airline[48]{}, originName[56]{}, destinationName[56]{},
-      destinationCity[40]{};
+  char manufacturer[48]{}, airline[48]{}, originCity[40]{}, destinationCity[40]{};
   double originLat = NAN, originLon = NAN, destinationLat = NAN, destinationLon = NAN;
   uint32_t fetchedAt = 0;
   bool found = false;

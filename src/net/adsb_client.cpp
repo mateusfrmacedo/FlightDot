@@ -170,11 +170,10 @@ static Route enrich(const Aircraft &a) {
     filter["response"]["aircraft"]["manufacturer"] = true;
     filter["response"]["flightroute"]["airline"]["name"] = true;
     filter["response"]["flightroute"]["origin"]["icao_code"] = true;
-    filter["response"]["flightroute"]["origin"]["name"] = true;
+    filter["response"]["flightroute"]["origin"]["municipality"] = true;
     filter["response"]["flightroute"]["origin"]["latitude"] = true;
     filter["response"]["flightroute"]["origin"]["longitude"] = true;
     filter["response"]["flightroute"]["destination"]["icao_code"] = true;
-    filter["response"]["flightroute"]["destination"]["name"] = true;
     filter["response"]["flightroute"]["destination"]["municipality"] = true;
     filter["response"]["flightroute"]["destination"]["latitude"] = true;
     filter["response"]["flightroute"]["destination"]["longitude"] = true;
@@ -184,14 +183,12 @@ static Route enrich(const Aircraft &a) {
                doc["response"]["aircraft"]["manufacturer"] | "");
       snprintf(r.origin, sizeof(r.origin), "%s",
                doc["response"]["flightroute"]["origin"]["icao_code"] | "");
-      snprintf(r.originName, sizeof(r.originName), "%s",
-               doc["response"]["flightroute"]["origin"]["name"] | "");
+      snprintf(r.originCity, sizeof(r.originCity), "%s",
+               doc["response"]["flightroute"]["origin"]["municipality"] | "");
       snprintf(r.destination, sizeof(r.destination), "%s",
                doc["response"]["flightroute"]["destination"]["icao_code"] | "");
       snprintf(r.airline, sizeof(r.airline), "%s",
                doc["response"]["flightroute"]["airline"]["name"] | "");
-      snprintf(r.destinationName, sizeof(r.destinationName), "%s",
-               doc["response"]["flightroute"]["destination"]["name"] | "");
       snprintf(r.destinationCity, sizeof(r.destinationCity), "%s",
                doc["response"]["flightroute"]["destination"]["municipality"] | "");
       r.originLat = doc["response"]["flightroute"]["origin"]["latitude"] | NAN;

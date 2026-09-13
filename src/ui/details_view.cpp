@@ -49,20 +49,11 @@ void details(lv_draw_ctx_t *c, const Aircraft &a, const Route &r, int radarRange
       snprintf(duration, sizeof(duration), "%dh%02d", int(flightHours), int(flightHours * 60) % 60);
     }
   }
-  const char *originName = r.originName[0] ? r.originName : (r.origin[0] ? r.origin : "---");
-  const char *destinationName =
-      r.destinationName[0] ? r.destinationName
-                           : (r.destinationCity[0] ? r.destinationCity
-                                                   : (r.destination[0] ? r.destination : "---"));
+  const char *originCity = r.originCity[0] ? r.originCity : "---";
+  const char *destinationCity = r.destinationCity[0] ? r.destinationCity : "---";
   char originText[64], destinationText[64], routeLine[160];
-  if (r.originName[0] && r.origin[0])
-    snprintf(originText, sizeof(originText), "%.34s (%s)", originName, r.origin);
-  else
-    snprintf(originText, sizeof(originText), "%.40s", originName);
-  if (r.destinationName[0] && r.destination[0])
-    snprintf(destinationText, sizeof(destinationText), "%.34s (%s)", destinationName, r.destination);
-  else
-    snprintf(destinationText, sizeof(destinationText), "%.40s", destinationName);
+  snprintf(originText, sizeof(originText), "%.40s", originCity);
+  snprintf(destinationText, sizeof(destinationText), "%.40s", destinationCity);
   snprintf(routeLine, sizeof(routeLine), "Origem: %s\nDestino: %s", originText, destinationText);
   text(c, 32, 96, 402, routeLine, 0xffe69a, 12, LV_TEXT_ALIGN_CENTER);
 

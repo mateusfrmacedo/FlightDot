@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
       snprintf(route.hex, sizeof(route.hex), "%s", a.hex);
       snprintf(route.airline, sizeof(route.airline), "Companhia Demonstracao");
       snprintf(route.origin, sizeof(route.origin), "SBSR");
-      snprintf(route.originName, sizeof(route.originName), "Sao Jose do Rio Preto");
+      snprintf(route.originCity, sizeof(route.originCity), "Sao Jose do Rio Preto");
       snprintf(route.destination, sizeof(route.destination), "SBGR");
       snprintf(route.destinationCity, sizeof(route.destinationCity), "Guarulhos");
       snprintf(route.manufacturer, sizeof(route.manufacturer), "Airbus");
