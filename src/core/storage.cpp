@@ -5,6 +5,9 @@
 #include <cstring>
 #include <time.h>
 namespace storage {
+static bool supportedRange(int rangeKm) {
+  return rangeKm == 50 || rangeKm == 100 || rangeKm == 150 || rangeKm == 200 || rangeKm == 250;
+}
 struct LegacySettingsV1 {
   double lat, lon;
   int rangeKm, theme, brightness, utcOffsetMinutes, staleSeconds;
@@ -52,6 +55,8 @@ Settings load() {
     snprintf(s.centerName, sizeof(s.centerName), "Orindiúva");
   s.theme = 0;
   s.autoDim = false; // Retain the stored layout while retiring automatic dimming.
+  if (!supportedRange(s.rangeKm))
+    s.rangeKm = 150;
   s.staleSeconds = 20;
   snprintf(s.timezone, sizeof(s.timezone), "%s", "<-03>3");
   return validSettings(s) ? s : Settings{};

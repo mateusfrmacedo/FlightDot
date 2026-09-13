@@ -293,8 +293,8 @@ static void worker(void *) {
                 plane.distance = plane.bearing = 0;
                 xQueueOverwrite(snapshots, &next);
               } else {
-                setError(next.count > 1 ? "Voo ambiguo: use callsign exato"
-                                        : "Voo sem posicao ADS-B recente");
+                setError(next.count > 1 ? "Ambiguous flight: use the exact callsign"
+                                        : "Flight has no recent ADS-B position");
                 // Keep the last position with its original timestamp so it becomes stale.
                 host = (host + 1) % 3;
               }
@@ -317,7 +317,7 @@ static void worker(void *) {
         routeDue = millis() + 5000;
       }
     } else if (WiFi.status() == WL_CONNECTED)
-      setError("Aguardando horario NTP para HTTPS");
+      setError("Waiting for NTP time before HTTPS");
     vTaskDelay(pdMS_TO_TICKS(100));
   }
 }

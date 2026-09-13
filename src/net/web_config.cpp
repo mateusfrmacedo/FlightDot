@@ -23,7 +23,7 @@ extern const uint8_t airportsStart[] asm("_binary_data_airports_json_gz_start");
 extern const uint8_t airportsEnd[] asm("_binary_data_airports_json_gz_end");
 static bool authorized() {
   if (server.header("X-Radar-Token") != token && server.arg("token") != token) {
-    server.send(403, "text/plain", "Token invalido. Recarregue a pagina.");
+    server.send(403, "text/plain", "Invalid token. Reload the page.");
     return false;
   }
   return true;
@@ -68,16 +68,16 @@ void begin(Settings &s) {
     if (!authorized())
       return;
 #ifdef PLANO_MOCK
-    server.send(503, "text/plain", "Busca de voo requer firmware em modo real.");
+    server.send(503, "text/plain", "Flight search requires the regular firmware.");
 #else
     if (!server.hasArg("query") || server.arg("query").length() > 32 ||
         !adsb::follow(server.arg("query").c_str())) {
-      server.send(400, "text/plain; charset=utf-8", "Informe companhia e número: LA3030, G31600 ou TAM3030.");
+      server.send(400, "text/plain; charset=utf-8", "Enter an airline and flight number: LA3030, G31600, or TAM3030.");
       return;
     }
     server.send(200, "text/plain; charset=utf-8", server.arg("query").length() ?
-                "Buscando voo. O radar acompanhará a aeronave quando houver posição disponível." :
-                "Acompanhamento encerrado. Voltando ao centro salvo.");
+                "Looking for the flight. The radar will follow it when a position is available." :
+                "Stopped following. Returning to the saved centre.");
 #endif
   });
   server.on("/api/config", HTTP_GET, [] {
@@ -103,7 +103,9 @@ void begin(Settings &s) {
       return;
     Settings s = *config;
     bool ok = number("lat", s.lat) && number("lon", s.lon) && integer("rangeKm", s.rangeKm) &&
-              integer("brightness", s.brightness);
+              integer("brightness", s.brightness) &&
+              (s.rangeKm == 50 || s.rangeKm == 100 || s.rangeKm == 150 || s.rangeKm == 200 ||
+               s.rangeKm == 250);
     s.theme = 0;
     s.staleSeconds = 20;
     snprintf(s.timezone, sizeof(s.timezone), "%s", "<-03>3");
@@ -117,11 +119,11 @@ void begin(Settings &s) {
     s.sweep = server.arg("sweep") == "1";
     s.autoDim = false;
     if (!ok || !validSettings(s)) {
-      server.send(400, "text/plain", "Valores invalidos. Verifique coordenadas e alcance.");
+      server.send(400, "text/plain", "Invalid values. Check the coordinates and range.");
       return;
     }
     if (!storage::save(s)) {
-      server.send(500, "text/plain", "Falha ao salvar NVS");
+      server.send(500, "text/plain", "Could not save settings to NVS");
       return;
     }
 #ifndef PLANO_MOCK
@@ -130,7 +132,7 @@ void begin(Settings &s) {
 #endif
     *config = s;
     dirty = true;
-    server.send(200, "text/plain; charset=utf-8", "Configurações salvas.");
+    server.send(200, "text/plain; charset=utf-8", "Settings saved.");
   });
   server.on("/api/status", HTTP_GET, [] {
     StaticJsonDocument<1536> d;
@@ -165,11 +167,11 @@ void begin(Settings &s) {
     String ssid = server.arg("ssid"), pass = server.arg("password");
     if (ssid.isEmpty() || ssid.length() > 32 || pass.length() > 63 ||
         (pass.length() > 0 && pass.length() < 8)) {
-      server.send(400, "text/plain", "SSID ou senha invalidos");
+      server.send(400, "text/plain", "Invalid network name or password");
       return;
     }
     server.send(200, "text/plain",
-                "Conectando. Volte para sua rede e abra http://flightdot.local/");
+                "Connecting. Return to your network and open http://flightdot.local/");
     wifiManager::connect(ssid.c_str(), pass.c_str());
   });
   server.on("/api/wifi/scan", HTTP_POST, [] {
@@ -203,7 +205,7 @@ void begin(Settings &s) {
   server.on("/api/reset-wifi", HTTP_POST, [] {
     if (!authorized())
       return;
-    server.send(200, "text/plain", "Wi-Fi esquecido. Conecte ao FlightDot-Setup.");
+    server.send(200, "text/plain", "Wi-Fi forgotten. Connect to FlightDot-Setup.");
     wifiManager::reset();
   });
   server.onNotFound([] {
@@ -211,7 +213,7 @@ void begin(Settings &s) {
       server.sendHeader("Location", "http://192.168.4.1/");
       server.send(302, "text/plain", "");
     } else
-      server.send(404, "text/plain", "Nao encontrado");
+      server.send(404, "text/plain", "Not found");
   });
   server.begin();
 }
