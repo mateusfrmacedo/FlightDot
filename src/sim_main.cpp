@@ -98,12 +98,12 @@ int main(int argc, char **argv) {
       snprintf(route.origin, sizeof(route.origin), "SBSR");
       snprintf(route.destination, sizeof(route.destination), "SBGR");
       snprintf(route.destinationCity, sizeof(route.destinationCity), "Guarulhos");
-      snprintf(route.type, sizeof(route.type), "Airbus A320");
+      snprintf(route.manufacturer, sizeof(route.manufacturer), "Airbus");
+      snprintf(route.type, sizeof(route.type), "A320-200");
       route.originLat = -20.4697;
       route.originLon = -54.6703;
       route.destinationLat = -23.4356;
       route.destinationLon = -46.4731;
-      route.temperature = 24.3;
       route.found = true;
       ui::setRoute(route);
     }

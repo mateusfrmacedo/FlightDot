@@ -142,29 +142,6 @@ static bool safeToken(const char *s) {
       return false;
   return true;
 }
-static void fetchWeather(Route &r) {
-  if (!std::isfinite(r.destinationLat) || !std::isfinite(r.destinationLon))
-    return;
-  WiFiClientSecure client;
-  tls(client);
-  HTTPClient http;
-  char url[220];
-  snprintf(
-      url, sizeof(url),
-      "https://api.open-meteo.com/v1/forecast?latitude=%.5f&longitude=%.5f&current=temperature_2m",
-      r.destinationLat, r.destinationLon);
-  http.useHTTP10(true);
-  http.setConnectTimeout(4000);
-  http.setTimeout(5000);
-  http.setUserAgent("FlightDot/1.0 (personal ESP32)");
-  if (http.begin(client, url) && http.GET() == 200) {
-    DynamicJsonDocument weather(768), filter(192);
-    filter["current"]["temperature_2m"] = true;
-    if (!deserializeJson(weather, http.getStream(), DeserializationOption::Filter(filter)))
-      r.temperature = weather["current"]["temperature_2m"] | NAN;
-  }
-  http.end();
-}
 static Route enrich(const Aircraft &a) {
   Route r;
   if (storage::readRoute(a.hex, a.callsign, r))
@@ -190,6 +167,7 @@ static Route enrich(const Aircraft &a) {
   if (code == 200) {
     DynamicJsonDocument doc(6144), filter(1024);
     filter["response"]["aircraft"]["type"] = true;
+    filter["response"]["aircraft"]["manufacturer"] = true;
     filter["response"]["flightroute"]["airline"]["name"] = true;
     filter["response"]["flightroute"]["origin"]["icao_code"] = true;
     filter["response"]["flightroute"]["origin"]["latitude"] = true;
@@ -201,6 +179,8 @@ static Route enrich(const Aircraft &a) {
     filter["response"]["flightroute"]["destination"]["longitude"] = true;
     if (!deserializeJson(doc, http.getStream(), DeserializationOption::Filter(filter))) {
       snprintf(r.type, sizeof(r.type), "%s", doc["response"]["aircraft"]["type"] | "");
+      snprintf(r.manufacturer, sizeof(r.manufacturer), "%s",
+               doc["response"]["aircraft"]["manufacturer"] | "");
       snprintf(r.origin, sizeof(r.origin), "%s",
                doc["response"]["flightroute"]["origin"]["icao_code"] | "");
       snprintf(r.destination, sizeof(r.destination), "%s",
@@ -223,10 +203,8 @@ static Route enrich(const Aircraft &a) {
     storage::writeRoute(r);
   }
   http.end();
-  if (r.found) {
-    fetchWeather(r);
+  if (r.found)
     storage::writeRoute(r);
-  }
   return r;
 }
 // Resolve airline ticket identifiers (IATA) to the broadcast callsign once per search.

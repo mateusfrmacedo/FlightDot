@@ -29,15 +29,7 @@ void statistics(lv_draw_ctx_t *c, const Snapshot &d, int rangeKm, uint32_t color
 void details(lv_draw_ctx_t *c, const Aircraft &a, const Route &r, int radarRangeKm,
              uint32_t color) {
   const char *name = a.callsign[0] ? a.callsign : a.hex;
-  text(c, 55, 39, 356, name, color, 24, LV_TEXT_ALIGN_CENTER);
-
-  char badge[12]{};
-  if (a.callsign[0])
-    snprintf(badge, sizeof(badge), "%.3s", a.callsign);
-  else
-    snprintf(badge, sizeof(badge), "AIR");
-  circle(c, 233, 98, 32, color, 4);
-  text(c, 201, 86, 64, badge, color, 18, LV_TEXT_ALIGN_CENTER);
+  text(c, 55, 54, 356, name, color, 26, LV_TEXT_ALIGN_CENTER);
 
   float remainingKm = NAN, remainingHours = NAN, flightHours = NAN;
   char arrival[16] = "--:--", duration[24] = "--";
@@ -61,21 +53,19 @@ void details(lv_draw_ctx_t *c, const Aircraft &a, const Route &r, int radarRange
   snprintf(routeLine, sizeof(routeLine), "%s  >  %s%s%s", r.origin[0] ? r.origin : "---",
            r.destination[0] ? r.destination : "---", r.destinationCity[0] ? "  " : "",
            r.destinationCity);
-  text(c, 38, 140, 390, routeLine, 0xffe69a, 18, LV_TEXT_ALIGN_CENTER);
+  text(c, 38, 105, 390, routeLine, 0xffe69a, 18, LV_TEXT_ALIGN_CENTER);
 
-  char weather[20] = "consultando";
-  if (std::isfinite(r.temperature))
-    snprintf(weather, sizeof(weather), "%.1f C", r.temperature);
-  char b[560];
+  char b[640];
   snprintf(b, sizeof(b),
-           "%s  %s\nAltitude  %.0f m / %.0f ft\nVelocidade  %.0f km/h / %.0f kt\n"
+           "Matrícula  %s\nFabricante  %s\nModelo  %s\nAltitude  %.0f m / %.0f ft\nVelocidade  %.0f km/h / %.0f kt\n"
            "Distância  %.1f km / %.1f NM\nAlcance do radar  %d km\nRumo  %.0f°   Squawk  %s\nChegada aprox.  %s\n"
-           "Tempo de voo aprox.  %s\nClima destino  %s",
+           "Tempo de voo aprox.  %s",
            a.registration[0] ? a.registration : "Sem matrícula",
-           r.type[0] ? r.type : (a.type[0] ? a.type : "Tipo consultando"), a.altitude * .3048f,
+           r.manufacturer[0] ? r.manufacturer : "Consultando",
+           r.type[0] ? r.type : (a.type[0] ? a.type : "Consultando"), a.altitude * .3048f,
            a.altitude, a.speed * 1.852f, a.speed, a.distance, a.distance / 1.852f, radarRangeKm,
-           a.heading, a.squawk[0] ? a.squawk : "--", arrival, duration, weather);
-  text(c, 28, 166, 410, b, emergency(a) ? 0xff7777 : color, 18, LV_TEXT_ALIGN_CENTER);
+           a.heading, a.squawk[0] ? a.squawk : "--", arrival, duration);
+  text(c, 28, 132, 410, b, emergency(a) ? 0xff7777 : color, 17, LV_TEXT_ALIGN_CENTER);
   text(c, 85, 442, 296, "Toque para voltar", 0xb8c9be, 12, LV_TEXT_ALIGN_CENTER);
 }
 } // namespace ui
