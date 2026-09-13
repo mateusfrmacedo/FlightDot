@@ -205,10 +205,10 @@ void begin(Settings &s) {
       server.send(202, "application/json", "{\"scanning\":true}");
       return;
     }
-    StaticJsonDocument<4096> d;
+    StaticJsonDocument<6144> d;
     d["scanning"] = false;
     auto networks = d.createNestedArray("networks");
-    for (int i = 0; i < result && networks.size() < 20; ++i) {
+    for (int i = 0; i < result; ++i) {
       String ssid = WiFi.SSID(i);
       if (ssid.isEmpty())
         continue;
