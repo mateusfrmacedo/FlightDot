@@ -28,7 +28,7 @@ void prepareGeometry() {
       bool outerBezel = false;
       if (radius <= RADIUS + 3) {
         for (int ring = 57; ring <= RADIUS; ring += 57) {
-          float halfWidth = ring == RADIUS ? 3.f : 1.f;
+          float halfWidth = ring == RADIUS ? 2.f : 1.f;
           if (ring == RADIUS)
             outerBezel = fabsf(radius - ring) <= halfWidth + .5f;
           coverage =
