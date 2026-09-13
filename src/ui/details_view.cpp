@@ -68,6 +68,6 @@ void details(lv_draw_ctx_t *c, const Aircraft &a, const Route &r, int radarRange
            a.altitude, a.speed * 1.852f, a.speed, a.distance, a.distance / 1.852f, radarRangeKm,
            a.heading, a.squawk[0] ? a.squawk : "--", arrival, duration);
   text(c, 28, 140, 410, b, emergency(a) ? 0xff7777 : color, 17, LV_TEXT_ALIGN_CENTER);
-  text(c, 85, 442, 296, "Toque para voltar", 0xb8c9be, 12, LV_TEXT_ALIGN_CENTER);
+  text(c, 85, 422, 296, "Toque para voltar", 0xb8c9be, 12, LV_TEXT_ALIGN_CENTER);
 }
 } // namespace ui
